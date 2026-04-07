@@ -1,0 +1,1668 @@
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import {
+  ShoppingCart, Package, Users, TrendingUp, Search, Wifi, WifiOff, X,
+  MessageSquare, CheckCircle2, Wallet, History, BarChart3, Smartphone,
+  FileText, Trash2, AlertCircle, ChevronRight, Shield, Receipt, Star,
+  Truck, Send, Phone, Eye, EyeOff, Globe, Lock, Plus, Hash, Menu,
+  Repeat, Tag, Bell, Settings, Palette, ChevronDown, ChevronUp,
+  Calendar, ArrowLeft, ArrowRight, CreditCard, RefreshCw, ShoppingBag,
+  CheckSquare, AlertTriangle, TrendingDown, DollarSign, Zap, Info,
+  Edit3, Save, RotateCcw
+} from 'lucide-react';
+
+// ─────────────────────────────────────────
+//  THEME SYSTEM
+// ─────────────────────────────────────────
+const THEMES = {
+  blue:   { name: 'Ocean Blue',   primary: '#2563eb', primaryDark: '#1d4ed8', light: '#eff6ff', ring: 'ring-blue-500',   sidebar: 'bg-slate-900', accent: '#3b82f6'  },
+  green:  { name: 'Forest Green', primary: '#16a34a', primaryDark: '#15803d', light: '#f0fdf4', ring: 'ring-green-500',  sidebar: 'bg-slate-900', accent: '#22c55e'  },
+  red:    { name: 'Duka Red',     primary: '#dc2626', primaryDark: '#b91c1c', light: '#fef2f2', ring: 'ring-red-500',    sidebar: 'bg-slate-900', accent: '#ef4444'  },
+  purple: { name: 'Royal Purple', primary: '#7c3aed', primaryDark: '#6d28d9', light: '#f5f3ff', ring: 'ring-violet-500', sidebar: 'bg-slate-900', accent: '#8b5cf6'  },
+  amber:  { name: 'Warm Amber',   primary: '#d97706', primaryDark: '#b45309', light: '#fffbeb', ring: 'ring-amber-500',  sidebar: 'bg-stone-900',  accent: '#f59e0b'  },
+  teal:   { name: 'Teal Wave',    primary: '#0d9488', primaryDark: '#0f766e', light: '#f0fdfa', ring: 'ring-teal-500',   sidebar: 'bg-slate-900', accent: '#14b8a6'  },
+};
+
+// ─────────────────────────────────────────
+//  LANGUAGE
+// ─────────────────────────────────────────
+const LANG = {
+  en: {
+    appName:'Duka Yangu', counter:'Counter', warehouse:'Warehouse',
+    creditBook:'Credit Book', expenses:'Expenses', reports:'Reports',
+    notifications:'Notifications', settings:'Settings',
+    welcomeTitle:'Welcome to Duka Yangu', welcomeSub:'Set up your shop in 2 minutes',
+    step1:'Shop Details', step2:'Security PIN', step3:'Language',
+    shopName:'Shop Name', ownerName:'Your Full Name', ownerPhone:'Your M-Pesa Phone',
+    createPin:'Create a 4-digit PIN', confirmPin:'Confirm your PIN',
+    pinMismatch:"PINs don't match — try again",
+    pickLanguage:'Pick your language', finish:"Let's Go!",
+    next:'Next', back:'Back',
+    enterPin:'Enter your PIN to unlock', wrongPin:'Wrong PIN — try again',
+    forgotPin:'Forgot PIN?', resetViaSMS:'A reset code will be sent to your registered phone.',
+    searchGoods:'Search goods…', basket:'Basket', empty:'Basket is empty',
+    total:'Total', deni:'Deni', cash:'Cash', mpesaPush:'M-PESA',
+    outOfStock:'Out of stock!', left:'left',
+    confirmSaleTitle:'Confirm Sale', correct:'Is this correct?',
+    confirmYes:'CONFIRM', confirmNo:'Back',
+    profit:'Profit', discount:'5% Loyalty Off',
+    recurringTitle:'Recurring Customer!', recurringBody:'This phone paid 3+ times. Apply 5% loyalty discount?',
+    applyDiscount:'Apply 5% Off', skipDiscount:'Skip',
+    mpesaPhonePrompt:"Customer M-Pesa phone (optional)", enterPhone:'e.g. 0712345678', skip:'Skip',
+    inventory:'Inventory', suppliers:'Suppliers', restock:'Restock',
+    addItem:'Add Item', addSupplier:'Add Supplier', addOrder:'New Order',
+    margin:'Margin', price:'Price', stock:'Stock', lowStockAlert:'Low Stock — Order Soon',
+    suppliesLabel:'Supplies', lastOrder:'Last Order', callSupplier:'Call',
+    deleteSupplier:'Delete', confirmDeleteSupplier:'Delete this supplier? Cannot undo.',
+    confirmDeleteYes:'Delete', confirmDeleteNo:'Cancel',
+    supplierRating:'Rating', itemsSupplied:'Items Supplied',
+    addItemTag:'Type item, press Enter', noItems:'No items linked',
+    outstanding:'Outstanding', addCustomer:'Add Customer',
+    itemizedDebts:'Debts', balance:'Balance',
+    overdue:'Overdue', since:'Since', noActiveDebts:'✓ No active debts',
+    smsReminder:'SMS', clearDebtTitle:'Clear Debt',
+    clearDebtCash:'Paid in Cash', clearDebtMpesa:'Paid via M-Pesa', clearDebtCancel:'Cancel',
+    ratingAuto:'Rating is automatic — based on overdue debts',
+    expTracker:'Expenses', monthTotal:'Month Total',
+    addExpense:'+ Expense', allExpenses:'All Expenses',
+    mustPay:'Must Pay', recurring:'Recurring', oneOff:'One-Off',
+    expPeriod:'Period', weekly:'Weekly', monthly:'Monthly', allTime:'All Time',
+    expBreakdown:'Breakdown',
+    today:'Today', performance:'Performance', analysis:'Analysis', loan:'Loan Score',
+    eodReport:'EOD Report',
+    salesLogged:'Sales', physicalCash:'Cash In', newDeni:'Deni Out',
+    transactions:'Transactions', prevDays:'History', viewDate:'View Date',
+    topMoving:'Top Moving', slowMoving:'Slow Moving',
+    thisWeek:'This Week', thisMonth:'This Month', thisYear:'This Year',
+    quarterly:'Quarterly Overview',
+    totalSales:'Total Sales', cashCollected:'Cash', deniOut:'Deni Out',
+    grossProfit:'Gross Profit', expensesLabel:'Expenses', netAfterExp:'Net Profit',
+    topGoods:'Top Goods', slowGoods:'Slow Goods', genPDF:'Generate PDF',
+    loanReady:'🟢 LOAN READY', almostThere:'🟡 ALMOST THERE', needsWork:'🔴 NEEDS WORK',
+    basedOn:'Based on 3-month data', scoreBreakdown:'Score Breakdown',
+    offlineBanner:'OFFLINE', live:'LIVE', offline:'OFFLINE', stockValue:'Stock Value',
+    stockEntry:'Add Stock', itemName:'Item Name', buyPrice:'Buy Price',
+    sellPrice:'Sell Price', quantity:'Quantity', unit:'Unit', addToWarehouse:'Add to Warehouse',
+    newCustomer:'New Customer', fullName:'Full Name', phone:'Phone',
+    registerCustomer:'Register', choosePayer:'Choose Customer', registerNew:'+ New Customer',
+    newSupplier:'New Supplier', companyName:'Company Name', contactPerson:'Contact Person',
+    phoneNumber:'Phone Number', addSupplierBtn:'Add Supplier',
+    recordExpense:'Record Expense', amount:'Amount (KSh)', date:'Date',
+    note:'Note', recordExpBtn:'Record Expense',
+    restockOrder:'Restock Order', qtyToOrder:'Quantity', placeOrder:'Place Order',
+    brandSettings:'Brand & Appearance', chooseColor:'Choose your brand color',
+    noNotifications:'All clear — no alerts',
+    notifLowStock:'Low stock', notifCashFlow:'Cash flow alert', notifDebt:'Overdue debt',
+    orderDetails:'Order Details', itemEntry:'Add items to the order',
+    addItemToOrder:'Type item name…', addMore:'Add Item', removeItem:'Remove',
+    orderSummary:'Order Summary', choosePayment:'Choose Payment',
+  },
+  sw: {
+    appName:'Duka Yangu', counter:'Kaunta', warehouse:'Ghala',
+    creditBook:'Daftari la Deni', expenses:'Gharama', reports:'Ripoti',
+    notifications:'Arifa', settings:'Mipangilio',
+    welcomeTitle:'Karibu Duka Yangu', welcomeSub:'Weka duka lako kwa dakika 2',
+    step1:'Maelezo ya Duka', step2:'PIN ya Usalama', step3:'Lugha',
+    shopName:'Jina la Duka', ownerName:'Jina Lako Kamili', ownerPhone:'Simu ya M-Pesa',
+    createPin:'Tengeneza PIN ya tarakimu 4', confirmPin:'Thibitisha PIN yako',
+    pinMismatch:'PIN hazifanani — jaribu tena',
+    pickLanguage:'Chagua lugha yako', finish:'Ingia Dukani!',
+    next:'Endelea', back:'Rudi',
+    enterPin:'Ingiza PIN yako', wrongPin:'PIN si sahihi — jaribu tena',
+    forgotPin:'Umesahau PIN?', resetViaSMS:'Nambari itatumwa kwa simu yako.',
+    searchGoods:'Tafuta bidhaa…', basket:'Kikapu', empty:'Kikapu kiko tupu',
+    total:'Jumla', deni:'Deni', cash:'Taslimu', mpesaPush:'M-PESA',
+    outOfStock:'Imekwisha!', left:'iliyobaki',
+    confirmSaleTitle:'Thibitisha Mauzo', correct:'Je, hii ni sahihi?',
+    confirmYes:'THIBITISHA', confirmNo:'Rudi',
+    profit:'Faida', discount:'Punguzo la 5%',
+    recurringTitle:'Mteja wa Kawaida!', recurringBody:'Simu hii imelipa mara 3+. Toa punguzo la 5%?',
+    applyDiscount:'Toa Punguzo', skipDiscount:'Acha',
+    mpesaPhonePrompt:'Simu ya M-Pesa ya mteja (hiari)', enterPhone:'mfano: 0712345678', skip:'Ruka',
+    inventory:'Bidhaa', suppliers:'Wasambazaji', restock:'Maagizo',
+    addItem:'Ongeza Bidhaa', addSupplier:'Ongeza Msambazaji', addOrder:'Agizo Jipya',
+    margin:'Faida', price:'Bei', stock:'Idadi', lowStockAlert:'Inakwisha — Agiza Haraka',
+    suppliesLabel:'Anauza', lastOrder:'Agizo la Mwisho', callSupplier:'Piga Simu',
+    deleteSupplier:'Futa', confirmDeleteSupplier:'Futa msambazaji huyu?',
+    confirmDeleteYes:'Futa', confirmDeleteNo:'Ghairi',
+    supplierRating:'Kiwango', itemsSupplied:'Bidhaa Anazouza',
+    addItemTag:'Andika bidhaa, bonyeza Enter', noItems:'Hakuna bidhaa',
+    outstanding:'Deni Iliyobaki', addCustomer:'Ongeza Mteja',
+    itemizedDebts:'Madeni', balance:'Jumla',
+    overdue:'Imechelewa', since:'Tangu', noActiveDebts:'✓ Hakuna deni',
+    smsReminder:'SMS', clearDebtTitle:'Futa Deni',
+    clearDebtCash:'Amlipa Taslimu', clearDebtMpesa:'Amlipa M-Pesa', clearDebtCancel:'Ghairi',
+    ratingAuto:'Kiwango ni cha kiotomatiki — kulingana na deni zilizochelewa',
+    expTracker:'Gharama', monthTotal:'Gharama za Mwezi',
+    addExpense:'+ Gharama', allExpenses:'Gharama Zote',
+    mustPay:'Lazima', recurring:'Inarudi', oneOff:'Mara Moja',
+    expPeriod:'Kipindi', weekly:'Wiki', monthly:'Mwezi', allTime:'Yote',
+    expBreakdown:'Muhtasari',
+    today:'Leo', performance:'Utendaji', analysis:'Uchambuzi', loan:'Alama ya Mkopo',
+    eodReport:'Ripoti ya WhatsApp',
+    salesLogged:'Mauzo', physicalCash:'Pesa Ndani', newDeni:'Deni Mpya',
+    transactions:'Miamala', prevDays:'Historia', viewDate:'Tazama Tarehe',
+    topMoving:'Zinazouzwa Zaidi', slowMoving:'Zinazouzwa Kidogo',
+    thisWeek:'Wiki Hii', thisMonth:'Mwezi Huu', thisYear:'Mwaka Huu',
+    quarterly:'Muhtasari wa Robo ya Mwaka',
+    totalSales:'Mauzo Yote', cashCollected:'Taslimu', deniOut:'Deni Iliyobaki',
+    grossProfit:'Faida Ghafi', expensesLabel:'Gharama', netAfterExp:'Faida Halisi',
+    topGoods:'Bidhaa Bora', slowGoods:'Bidhaa Polepole', genPDF:'Ripoti PDF',
+    loanReady:'🟢 TAYARI KWA MKOPO', almostThere:'🟡 KARIBU TAYARI', needsWork:'🔴 BADO KIDOGO',
+    basedOn:'Kulingana na data ya miezi 3', scoreBreakdown:'Maelezo ya Alama',
+    offlineBanner:'BILA MTANDAO', live:'MTANDAO', offline:'BILA MTANDAO', stockValue:'Thamani',
+    stockEntry:'Ingiza Bidhaa', itemName:'Jina la Bidhaa', buyPrice:'Bei ya Kununulia',
+    sellPrice:'Bei ya Kuuzia', quantity:'Idadi', unit:'Kipimo', addToWarehouse:'Ongeza Ghalani',
+    newCustomer:'Mteja Mpya', fullName:'Jina Kamili', phone:'Simu',
+    registerCustomer:'Sajili', choosePayer:'Chagua Mlipaji', registerNew:'+ Sajili Mpya',
+    newSupplier:'Msambazaji Mpya', companyName:'Jina la Kampuni',
+    contactPerson:'Mtu wa Kuwasiliana', phoneNumber:'Nambari ya Simu',
+    addSupplierBtn:'Ongeza Msambazaji',
+    recordExpense:'Rekodi Gharama', amount:'Kiasi (KSh)', date:'Tarehe',
+    note:'Kumbuka', recordExpBtn:'Rekodi Gharama',
+    restockOrder:'Agizo la Bidhaa', qtyToOrder:'Idadi ya Kuagiza', placeOrder:'Weka Agizo',
+    brandSettings:'Rangi za Duka', chooseColor:'Chagua rangi yako ya brand',
+    noNotifications:'Kila kitu sawa — hakuna arifa',
+    notifLowStock:'Bidhaa inakwisha', notifCashFlow:'Onyo la fedha', notifDebt:'Deni imechelewa',
+    orderDetails:'Maelezo ya Agizo', itemEntry:'Ongeza bidhaa kwa agizo',
+    addItemToOrder:'Jina la bidhaa…', addMore:'Ongeza', removeItem:'Ondoa',
+    orderSummary:'Muhtasari', choosePayment:'Chagua Malipo',
+  }
+};
+
+// ─────────────────────────────────────────
+//  INDEXEDDB
+// ─────────────────────────────────────────
+const useOffline = () => {
+  const open = () => new Promise((res,rej) => {
+    const r = indexedDB.open('DukaDB_v6',1);
+    r.onupgradeneeded = e => { if(!e.target.result.objectStoreNames.contains('kv')) e.target.result.createObjectStore('kv'); };
+    r.onsuccess = e => res(e.target.result);
+    r.onerror = () => rej(r.error);
+  });
+  const save = async (key,val) => { try { const db=await open(); db.transaction('kv','readwrite').objectStore('kv').put(JSON.stringify(val),key); } catch(_){} };
+  const load = async (key) => { try { const db=await open(); return new Promise(res=>{ const r=db.transaction('kv','readonly').objectStore('kv').get(key); r.onsuccess=()=>res(r.result?JSON.parse(r.result):null); r.onerror=()=>res(null); }); } catch(_){return null;} };
+  return { save, load };
+};
+
+// ─────────────────────────────────────────
+//  SEED DATA
+// ─────────────────────────────────────────
+const SEED_INVENTORY = [
+  { id:1, name:'Jogoo Maize 2kg',  buyPrice:165, sellPrice:210, stock:45, unit:'packet', salesCount:{week:35,month:120,year:1400} },
+  { id:2, name:'Broadways Bread',  buyPrice:54,  sellPrice:65,  stock:8,  unit:'loaf',   salesCount:{week:85,month:300,year:3600} },
+  { id:3, name:'Milk (Brookside)', buyPrice:48,  sellPrice:60,  stock:3,  unit:'pouch',  salesCount:{week:60,month:250,year:3000} },
+  { id:4, name:'Blue Band 250g',   buyPrice:95,  sellPrice:125, stock:15, unit:'tin',    salesCount:{week:10,month:45, year:540 } },
+  { id:5, name:'Sugar (1kg)',      buyPrice:135, sellPrice:160, stock:22, unit:'kg',     salesCount:{week:22,month:80, year:960 } },
+  { id:6, name:'Eggs (Full Crate)',buyPrice:550, sellPrice:650, stock:5,  unit:'dozen',  salesCount:{week:4, month:15, year:180 } },
+  { id:7, name:'Omo Small',        buyPrice:15,  sellPrice:20,  stock:100,unit:'sachet', salesCount:{week:90,month:400,year:4800} },
+  { id:8, name:'Cooking Oil 1L',   buyPrice:290, sellPrice:340, stock:12, unit:'bottle', salesCount:{week:2, month:5,  year:60  } },
+];
+const SEED_DENI = [
+  { id:1, name:'Mama Njoroge', phone:'0712345678', debts:[{id:101,amount:1450,date:'2024-03-01',note:'Groceries'},{id:102,amount:1000,date:'2024-03-20',note:'Bread + milk'}] },
+  { id:2, name:'Steve (Boda)', phone:'0722334455', debts:[{id:103,amount:350,date:'2024-03-25',note:'Omo + eggs'}] },
+  { id:3, name:'Baba Silas',   phone:'0733445566', debts:[{id:104,amount:1100,date:'2024-03-05',note:'Sugar + oil'}] },
+];
+const SEED_SUPPLIERS = [
+  { id:1, name:'Bidco East Africa', phone:'0700111222', contact:'Kamau',  items:['Cooking Oil 1L','Blue Band 250g'], lastOrder:'2024-03-15', rating:5 },
+  { id:2, name:'Jogoo Mills Depot', phone:'0722333444', contact:'Wanjiku',items:['Jogoo Maize 2kg'],                  lastOrder:'2024-03-10', rating:4 },
+  { id:3, name:'Naivas Wholesale',  phone:'0733555666', contact:'Peter',  items:['Sugar (1kg)','Broadways Bread'],   lastOrder:'2024-03-20', rating:5 },
+];
+const SEED_RESTOCKS = [
+  { id:1, supplierId:1, item:'Cooking Oil 1L',  qty:24, totalCost:6960, status:'pending',   date:'2024-03-26' },
+  { id:2, supplierId:3, item:'Broadways Bread', qty:30, totalCost:1620, status:'delivered', date:'2024-03-24' },
+];
+const SEED_EXPENSES = [
+  { id:1,  category:'Rent',       type:'fixed',     amount:8000, date:'2024-03-01', note:'Monthly shop rent' },
+  { id:2,  category:'Electricity',type:'fixed',     amount:1200, date:'2024-03-15', note:'KPLC token' },
+  { id:3,  category:'Staff',      type:'fixed',     amount:5000, date:'2024-03-05', note:'Helper wage' },
+  { id:4,  category:'Transport',  type:'recurring', amount:450,  date:'2024-03-20', note:'Goods pickup' },
+  { id:5,  category:'Packaging',  type:'recurring', amount:300,  date:'2024-03-22', note:'Paper bags' },
+  { id:6,  category:'Repairs',    type:'oneoff',    amount:1500, date:'2024-03-10', note:'Fridge repair' },
+  { id:7,  category:'Rent',       type:'fixed',     amount:8000, date:'2024-02-01', note:'Monthly shop rent' },
+  { id:8,  category:'Electricity',type:'fixed',     amount:1100, date:'2024-02-14', note:'KPLC token' },
+  { id:9,  category:'Staff',      type:'fixed',     amount:5000, date:'2024-02-05', note:'Helper wage' },
+  { id:10, category:'Transport',  type:'recurring', amount:500,  date:'2024-02-18', note:'Goods pickup' },
+];
+const SEED_TX = [
+  { id:1, type:'CASH',  amount:1200, time:'10:30 AM', items:3, date:'2024-03-27' },
+  { id:2, type:'MPESA', amount:450,  time:'11:15 AM', items:1, date:'2024-03-27' },
+  { id:3, type:'DENI',  amount:300,  time:'12:00 PM', items:1, date:'2024-03-27' },
+  { id:4, type:'CASH',  amount:780,  time:'09:10 AM', items:2, date:'2024-03-26' },
+  { id:5, type:'MPESA', amount:1100, time:'02:30 PM', items:4, date:'2024-03-26' },
+  { id:6, type:'CASH',  amount:650,  time:'11:00 AM', items:2, date:'2024-03-25' },
+];
+const HISTORY = {
+  January:  { sales:98000,  profit:21000, deni:15000, cash:83000,  expenses:12000, top:'Maize Meal', slow:'Salt',        desc:"Steady month. High credit sales due to back-to-school season. Cash flow was tight." },
+  February: { sales:115000, profit:26000, deni:11000, cash:104000, expenses:13500, top:'Sugar',      slow:'Soap',        desc:"Good recovery from Njaanuary. Debt collection improved a lot." },
+  March:    { sales:142500, profit:32800, deni:8400,  cash:134100, expenses:9950,  top:'Bread',      slow:'Cooking Oil', desc:"Excellent performance. Sales grew 14%. Deni outside dropped 22%." },
+};
+const FIXED_CATS    = ['Rent','Electricity','Water','Staff','Loan Repayment'];
+const RECURRING_CATS= ['Transport','Packaging','Internet','Insurance'];
+const EXPENSE_CATS  = ['Rent','Electricity','Water','Staff','Loan Repayment','Transport','Packaging','Internet','Insurance','Repairs','Other','Emergency'];
+const UNITS         = ['packet','kg','dozen','sachet','loaf','bottle','tin','pouch'];
+
+const getExpType = (cat) => FIXED_CATS.includes(cat)?'fixed': RECURRING_CATS.includes(cat)?'recurring':'oneoff';
+
+// ─────────────────────────────────────────
+//  SMALL HELPERS
+// ─────────────────────────────────────────
+const todayStr  = () => new Date().toISOString().split('T')[0];
+const timeNow   = () => new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+const fmtDate   = (d) => new Date(d).toLocaleDateString('en-KE',{day:'numeric',month:'short',year:'numeric'});
+const isOverdue14=(date)=> new Date(date)<new Date(Date.now()-14*86400000);
+const balance   = (debts)=> debts.reduce((a,d)=>a+d.amount,0);
+const custRating= (debts)=> Math.max(1,5-debts.filter(d=>isOverdue14(d.date)).length);
+
+// ─────────────────────────────────────────
+//  NOTIFICATION ENGINE
+// ─────────────────────────────────────────
+const buildNotifications = (inventory, deni, txs, expenses) => {
+  const notes = [];
+  // Low stock
+  inventory.filter(i=>i.stock<10).forEach(i => {
+    notes.push({ id:`low_${i.id}`, type:'warning', icon:'stock', title:`Low stock: ${i.name}`, body:`Only ${i.stock} ${i.unit}(s) left. Order soon.`, date:todayStr() });
+  });
+  // Overdue debts
+  deni.forEach(c => {
+    c.debts.filter(d=>isOverdue14(d.date)).forEach(d => {
+      notes.push({ id:`debt_${d.id}`, type:'danger', icon:'debt', title:`Overdue: ${c.name}`, body:`KSh ${d.amount.toLocaleString()} owed since ${fmtDate(d.date)}. Consider sending SMS.`, date:todayStr() });
+    });
+  });
+  // Cash flow — if last 7 days deni > 30% of sales
+  const recent = txs.filter(t=>new Date(t.date)>=new Date(Date.now()-7*86400000));
+  const recentSales = recent.reduce((a,b)=>a+b.amount,0);
+  const recentDeni  = recent.filter(t=>t.type==='DENI').reduce((a,b)=>a+b.amount,0);
+  if(recentSales>0 && recentDeni/recentSales>0.3) {
+    notes.push({ id:'cashflow', type:'info', icon:'cashflow', title:'High credit sales', body:`${Math.round(recentDeni/recentSales*100)}% of recent sales are on credit. Consider pushing cash/M-Pesa payments.`, date:todayStr() });
+  }
+  // High expenses
+  const monthExp = expenses.filter(e=>e.date.startsWith(todayStr().slice(0,7))).reduce((a,b)=>a+b.amount,0);
+  if(monthExp>20000) {
+    notes.push({ id:'highexp', type:'info', icon:'expenses', title:'High expenses this month', body:`KSh ${monthExp.toLocaleString()} spent. Review recurring costs.`, date:todayStr() });
+  }
+  return notes;
+};
+
+// ─────────────────────────────────────────
+//  ONBOARDING
+// ─────────────────────────────────────────
+const OInput = ({ label, ...props }) => (
+  <div>
+    <label className="text-[9px] font-black uppercase text-slate-500 tracking-wider block mb-1">{label}</label>
+    <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:border-blue-500 transition-colors placeholder:text-slate-400" {...props}/>
+  </div>
+);
+
+const OnboardingScreen = ({ onComplete }) => {
+  const [step,setStep]           = useState(0);
+  const [lang,setLang]           = useState('en');
+  const [shopName,setShopName]   = useState('');
+  const [ownerName,setOwnerName] = useState('');
+  const [ownerPhone,setOwnerPhone]= useState('');
+  const [pin,setPin]             = useState('');
+  const [pinConfirm,setPinConfirm]= useState('');
+  const [showPin,setShowPin]     = useState(false);
+  const [error,setError]         = useState('');
+  const t = k => LANG[lang][k]||k;
+  const steps = [t('step1'),t('step2'),t('step3')];
+  const next = () => {
+    setError('');
+    if(step===0&&(!shopName.trim()||!ownerName.trim()||!ownerPhone.trim())){setError('Please fill all fields.');return;}
+    if(step===1){if(pin.length!==4){setError('PIN must be 4 digits.');return;}if(pin!==pinConfirm){setError(t('pinMismatch'));return;}}
+    if(step===2){onComplete({shopName,ownerName,ownerPhone,pin,lang});return;}
+    setStep(s=>s+1);
+  };
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden">
+        <div className="bg-gradient-to-br from-blue-600 to-blue-700 px-6 py-8 text-white text-center">
+          <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl font-black">D</div>
+          <h1 className="text-xl font-black">{t('welcomeTitle')}</h1>
+          <p className="text-blue-200 text-sm mt-1">{t('welcomeSub')}</p>
+        </div>
+        <div className="flex px-6 pt-5 pb-2 gap-2">
+          {steps.map((s,i)=>(
+            <div key={i} className="flex-1">
+              <div className={`h-1 rounded-full transition-all duration-300 ${i<=step?'bg-blue-600':'bg-slate-200'}`}/>
+              <p className={`text-[9px] mt-1 font-bold ${i===step?'text-blue-600':'text-slate-400'}`}>{s}</p>
+            </div>
+          ))}
+        </div>
+        <div className="px-6 pb-6">
+          {step===0&&<div className="space-y-3 mt-3"><OInput label={t('shopName')} value={shopName} onChange={e=>setShopName(e.target.value)} placeholder="e.g. Duka la Mama Wanjiku"/><OInput label={t('ownerName')} value={ownerName} onChange={e=>setOwnerName(e.target.value)} placeholder="e.g. Wanjiku Mwangi"/><OInput label={t('ownerPhone')} value={ownerPhone} onChange={e=>setOwnerPhone(e.target.value)} placeholder="e.g. 0712345678" type="tel"/></div>}
+          {step===1&&<div className="space-y-3 mt-3">
+            <p className="text-sm text-slate-600">{t('createPin')}</p>
+            <div className="relative"><input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-mono text-xl tracking-[0.5em] outline-none focus:border-blue-500 text-center" type={showPin?'text':'password'} value={pin} onChange={e=>setPin(e.target.value.replace(/\D/g,'').slice(0,4))} maxLength={4} placeholder="••••"/><button type="button" onClick={()=>setShowPin(s=>!s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">{showPin?<EyeOff size={18}/>:<Eye size={18}/>}</button></div>
+            <p className="text-sm text-slate-600">{t('confirmPin')}</p>
+            <input className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-mono text-xl tracking-[0.5em] outline-none focus:border-blue-500 text-center" type={showPin?'text':'password'} value={pinConfirm} onChange={e=>setPinConfirm(e.target.value.replace(/\D/g,'').slice(0,4))} maxLength={4} placeholder="••••"/>
+          </div>}
+          {step===2&&<div className="mt-3"><p className="text-sm text-slate-600 mb-4">{t('pickLanguage')}</p><div className="grid grid-cols-2 gap-3">{[['en','English','🇬🇧'],['sw','Kiswahili','🇰🇪']].map(([code,label,flag])=><button key={code} onClick={()=>setLang(code)} className={`p-5 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${lang===code?'border-blue-600 bg-blue-50':'border-slate-200'}`}><span className="text-3xl">{flag}</span><span className={`font-black text-sm ${lang===code?'text-blue-600':'text-slate-700'}`}>{label}</span></button>)}</div></div>}
+          {error&&<p className="text-red-500 text-xs font-bold mt-3 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
+          <div className="flex gap-3 mt-5">
+            {step>0&&<button onClick={()=>{setStep(s=>s-1);setError('');}} className="flex-1 py-3 border border-slate-200 rounded-xl font-black text-xs text-slate-600">{t('back')}</button>}
+            <button onClick={next} className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-black text-xs hover:bg-blue-700 transition-colors shadow-md">{step===2?t('finish'):t('next')}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────
+//  PIN LOCK
+// ─────────────────────────────────────────
+const PinLock = ({ shopName, pin, onUnlock, lang, theme }) => {
+  const t = k => LANG[lang][k]||k;
+  const [entry,setEntry] = useState('');
+  const [err,setErr]     = useState('');
+  const [showReset,setShowReset] = useState(false);
+  const handleKey = k => {
+    if(k==='del'){setEntry(e=>e.slice(0,-1));return;}
+    if(entry.length>=4)return;
+    const next=entry+k;
+    setEntry(next);
+    if(next.length===4){if(next===pin){onUnlock();}else{setErr(t('wrongPin'));setTimeout(()=>{setEntry('');setErr('');},900);}}
+  };
+  return (
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-xs text-center">
+        <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{background:theme.primary}}><Lock size={28} className="text-white"/></div>
+        <p className="text-white font-black text-sm mb-1">{shopName||'Duka Yangu'}</p>
+        <p className="text-slate-400 text-xs mb-8">{t('enterPin')}</p>
+        <div className="flex justify-center gap-4 mb-6">{[0,1,2,3].map(i=><div key={i} className={`w-4 h-4 rounded-full border-2 transition-all ${i<entry.length?'border-0':'bg-transparent border-slate-600'}`} style={i<entry.length?{background:theme.primary}:{}}/>)}</div>
+        {err&&<p className="text-red-400 text-xs font-bold mb-4 animate-pulse">{err}</p>}
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          {['1','2','3','4','5','6','7','8','9','','0','del'].map(k=>(
+            <button key={k} onClick={()=>k&&handleKey(k)} className={`h-14 rounded-2xl font-black text-lg transition-all active:scale-95 ${k==='del'?'bg-slate-700 text-slate-300 text-sm':k===''?'bg-transparent cursor-default':'bg-slate-800 text-white hover:bg-slate-700'}`}>{k==='del'?'⌫':k}</button>
+          ))}
+        </div>
+        <button onClick={()=>setShowReset(s=>!s)} className="text-slate-500 text-xs hover:text-slate-400">{t('forgotPin')}</button>
+        {showReset&&<p className="text-slate-400 text-xs mt-2 bg-slate-800 p-3 rounded-xl">{t('resetViaSMS')}</p>}
+      </div>
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────
+//  MODAL WRAPPER
+// ─────────────────────────────────────────
+const Modal = ({ title, onClose, children, wide=false }) => (
+  <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+    <div className={`bg-white w-full ${wide?'max-w-2xl':'max-w-sm'} rounded-3xl p-6 shadow-2xl max-h-[92vh] overflow-y-auto`}>
+      <div className="flex justify-between items-center mb-5">
+        <h3 className="font-black text-xs uppercase tracking-widest text-slate-800">{title}</h3>
+        <button onClick={onClose} className="text-slate-400 hover:text-slate-800 bg-slate-100 p-1.5 rounded-lg transition-colors"><X size={14}/></button>
+      </div>
+      {children}
+    </div>
+  </div>
+);
+const MI = (props) => <input className="w-full bg-slate-50 rounded-xl p-3 font-bold text-sm outline-none border border-slate-200 text-slate-900 focus:border-blue-500 focus:bg-white transition-colors placeholder:text-slate-400" {...props}/>;
+
+// ─────────────────────────────────────────
+//  SALE CONFIRM MODAL
+// ─────────────────────────────────────────
+const SaleConfirmModal = ({ amount, profit, orderItems, method, discount5, onConfirm, onCancel, t, theme }) => (
+  <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[250] flex items-end sm:items-center justify-center p-4">
+    <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl">
+      <div className="text-center mb-5">
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3" style={{background:theme.light}}><Receipt size={24} style={{color:theme.primary}}/></div>
+        <h3 className="font-black text-lg text-slate-800">{t('confirmSaleTitle')}</h3>
+        {discount5&&<span className="text-[9px] bg-amber-100 text-amber-700 font-black px-2 py-1 rounded-full">{t('discount')}</span>}
+      </div>
+      <div className="bg-slate-50 rounded-2xl p-4 mb-5 space-y-2 max-h-48 overflow-y-auto">
+        {orderItems.map((item,i)=>(
+          <div key={i} className="flex justify-between text-sm">
+            <span className="text-slate-600 truncate flex-1 mr-2">{item.name} × {item.qty}</span>
+            <span className="font-bold text-slate-800 shrink-0">KSh {(item.price*item.qty).toLocaleString()}</span>
+          </div>
+        ))}
+        <div className="border-t border-slate-200 pt-2 mt-2">
+          <div className="flex justify-between items-end">
+            <div>
+              <p className="text-[9px] text-slate-400 font-bold">{method}</p>
+              <p className="text-[10px] text-emerald-600 font-bold">{t('profit')}: KSh {profit.toLocaleString()}</p>
+            </div>
+            <span className="font-black text-2xl" style={{color:theme.primary}}>KSh {amount.toLocaleString()}</span>
+          </div>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <button onClick={onCancel} className="py-3.5 border border-slate-200 rounded-2xl font-black text-sm text-slate-600 hover:bg-slate-50">{t('confirmNo')}</button>
+        <button onClick={onConfirm} className="py-3.5 text-white rounded-2xl font-black text-sm shadow-md" style={{background:theme.primary}}>{t('confirmYes')}</button>
+      </div>
+    </div>
+  </div>
+);
+
+// ─────────────────────────────────────────
+//  MPESA PHONE MODAL
+// ─────────────────────────────────────────
+const MpesaPhoneModal = ({ onSubmit, onSkip, t }) => {
+  const [phone,setPhone]=useState('');
+  return (
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[260] flex items-end sm:items-center justify-center p-4">
+      <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center"><Smartphone size={18} className="text-emerald-600"/></div>
+          <p className="font-black text-sm text-slate-800">{t('mpesaPhonePrompt')}</p>
+        </div>
+        <MI placeholder={t('enterPhone')} value={phone} onChange={e=>setPhone(e.target.value.replace(/\D/g,'').slice(0,12))} type="tel" className="mb-4 w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-bold text-sm outline-none focus:border-emerald-500"/>
+        <div className="grid grid-cols-2 gap-3">
+          <button onClick={onSkip} className="py-3 border border-slate-200 rounded-xl font-black text-xs text-slate-500">{t('skip')}</button>
+          <button onClick={()=>onSubmit(phone)} className="py-3 bg-emerald-500 text-white rounded-xl font-black text-xs">{t('confirmYes')}</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────
+//  RECURRING DISCOUNT MODAL
+// ─────────────────────────────────────────
+const RecurringModal = ({ phone, onApply, onSkip, t }) => (
+  <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[270] flex items-end sm:items-center justify-center p-4">
+    <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl border-t-4 border-amber-400">
+      <div className="text-center mb-4">
+        <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-3"><Star size={24} className="text-amber-500 fill-amber-400"/></div>
+        <h3 className="font-black text-lg text-slate-800">{t('recurringTitle')}</h3>
+        <p className="text-slate-500 text-sm mt-1">{t('recurringBody')}</p>
+        <p className="text-[10px] text-slate-400 font-mono mt-1">{phone}</p>
+      </div>
+      <button onClick={onApply} className="w-full py-3.5 bg-amber-400 text-slate-900 rounded-2xl font-black text-sm hover:bg-amber-500 mb-3">{t('applyDiscount')}</button>
+      <button onClick={onSkip} className="w-full py-3 border border-slate-200 rounded-2xl font-black text-xs text-slate-500">{t('skipDiscount')}</button>
+    </div>
+  </div>
+);
+
+// ─────────────────────────────────────────
+//  CLEAR DEBT MODAL (Cash or M-Pesa)
+// ─────────────────────────────────────────
+const ClearDebtModal = ({ debt, customer, onClear, onCancel, t, theme }) => (
+  <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[280] flex items-end sm:items-center justify-center p-4">
+    <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl">
+      <div className="text-center mb-5">
+        <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-3"><CheckCircle2 size={24} className="text-emerald-600"/></div>
+        <h3 className="font-black text-lg text-slate-800">{t('clearDebtTitle')}</h3>
+        <p className="text-slate-500 text-sm">{customer.name}</p>
+        <p className="font-black text-2xl mt-2" style={{color:theme.primary}}>KSh {debt.amount.toLocaleString()}</p>
+        <p className="text-[10px] text-slate-400 font-bold">{t('since')} {fmtDate(debt.date)}</p>
+        {debt.note&&<p className="text-[10px] text-slate-500 mt-1 italic">"{debt.note}"</p>}
+      </div>
+      <p className="text-[9px] font-black text-center text-slate-500 uppercase tracking-wider mb-3">How did they pay?</p>
+      <div className="grid grid-cols-2 gap-3 mb-3">
+        <button onClick={()=>onClear('CASH')} className="py-4 rounded-2xl font-black text-sm bg-slate-900 text-white flex flex-col items-center gap-1 hover:bg-slate-800 transition-colors">
+          <Wallet size={20}/>{t('clearDebtCash')}
+        </button>
+        <button onClick={()=>onClear('MPESA')} className="py-4 rounded-2xl font-black text-sm bg-emerald-500 text-white flex flex-col items-center gap-1 hover:bg-emerald-600 transition-colors">
+          <Smartphone size={20}/>{t('clearDebtMpesa')}
+        </button>
+      </div>
+      <button onClick={onCancel} className="w-full py-3 border border-slate-200 rounded-xl font-black text-xs text-slate-500">{t('clearDebtCancel')}</button>
+    </div>
+  </div>
+);
+
+// ─────────────────────────────────────────
+//  BRAND SETTINGS PANEL
+// ─────────────────────────────────────────
+const BrandSettings = ({ theme, setThemeKey, themeKey, t }) => (
+  <div className="p-4 flex flex-col gap-5">
+    <div>
+      <h2 className="font-black text-lg uppercase text-slate-800 mb-1">{t('brandSettings')}</h2>
+      <p className="text-[10px] text-slate-500 font-bold">{t('chooseColor')}</p>
+    </div>
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      {Object.entries(THEMES).map(([key,th])=>(
+        <button key={key} onClick={()=>setThemeKey(key)}
+          className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-3 transition-all ${themeKey===key?'border-slate-800 shadow-lg':'border-slate-200 hover:border-slate-300'}`}>
+          <div className="w-12 h-12 rounded-xl shadow-md" style={{background:th.primary}}/>
+          <span className={`font-black text-xs ${themeKey===key?'text-slate-800':'text-slate-500'}`}>{th.name}</span>
+          {themeKey===key&&<CheckCircle2 size={16} className="text-slate-800"/>}
+        </button>
+      ))}
+    </div>
+    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+      <p className="text-[9px] font-black uppercase text-slate-400 mb-2">Preview</p>
+      <div className="flex gap-3 items-center">
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black" style={{background:theme.primary}}>D</div>
+        <div>
+          <p className="font-black text-sm" style={{color:theme.primary}}>Duka Yangu</p>
+          <p className="text-[9px] text-slate-500">Your brand color applied everywhere</p>
+        </div>
+        <button className="ml-auto px-4 py-2 rounded-xl text-white text-xs font-black" style={{background:theme.primary}}>Sample</button>
+      </div>
+    </div>
+  </div>
+);
+
+// ─────────────────────────────────────────
+//  NOTIFICATIONS PANEL
+// ─────────────────────────────────────────
+const NotificationsPanel = ({ notifications, onDismiss, t, theme }) => {
+  const iconMap = {
+    stock:    <Package size={16}/>,
+    debt:     <Users size={16}/>,
+    cashflow: <TrendingDown size={16}/>,
+    expenses: <Receipt size={16}/>,
+  };
+  const colorMap = {
+    warning: { bg:'bg-amber-50', border:'border-amber-200', text:'text-amber-700', iconBg:'bg-amber-100' },
+    danger:  { bg:'bg-red-50',   border:'border-red-200',   text:'text-red-700',   iconBg:'bg-red-100' },
+    info:    { bg:'bg-blue-50',  border:'border-blue-200',  text:'text-blue-700',  iconBg:'bg-blue-100' },
+  };
+  return (
+    <div className="p-4 flex flex-col gap-3">
+      <div className="flex items-center justify-between mb-1">
+        <h2 className="font-black text-lg uppercase text-slate-800">{t('notifications')}</h2>
+        {notifications.length>0&&<span className="w-6 h-6 rounded-full text-white text-[9px] font-black flex items-center justify-center" style={{background:theme.primary}}>{notifications.length}</span>}
+      </div>
+      {notifications.length===0&&(
+        <div className="flex flex-col items-center justify-center py-16 text-slate-300">
+          <CheckCircle2 size={40} className="mb-3 opacity-40"/>
+          <p className="text-sm font-black text-slate-400">{t('noNotifications')}</p>
+        </div>
+      )}
+      {notifications.map(n=>{
+        const c = colorMap[n.type]||colorMap.info;
+        return (
+          <div key={n.id} className={`p-4 rounded-2xl border flex gap-3 items-start ${c.bg} ${c.border}`}>
+            <div className={`p-2 rounded-xl shrink-0 ${c.iconBg} ${c.text}`}>{iconMap[n.icon]||<Bell size={16}/>}</div>
+            <div className="flex-1 min-w-0">
+              <p className={`font-black text-xs ${c.text}`}>{n.title}</p>
+              <p className="text-[10px] text-slate-600 mt-0.5 leading-relaxed">{n.body}</p>
+            </div>
+            <button onClick={()=>onDismiss(n.id)} className="text-slate-400 hover:text-slate-600 shrink-0 p-1"><X size={13}/></button>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────
+//  SIDEBAR
+// ─────────────────────────────────────────
+const Sidebar = ({ tab, setTab, t, shopInfo, lang, setLang, save, setShopInfo, isOnline, stockValue, mobileOpen, setMobileOpen, theme, notifCount }) => {
+  const navItems = [
+    { id:'sales',    icon:ShoppingCart, label:t('counter') },
+    { id:'stock',    icon:Package,      label:t('warehouse') },
+    { id:'deni',     icon:Users,        label:t('creditBook') },
+    { id:'expenses', icon:Receipt,      label:t('expenses') },
+    { id:'trends',   icon:TrendingUp,   label:t('reports') },
+    { id:'notifications', icon:Bell,    label:t('notifications'), badge:notifCount },
+    { id:'settings', icon:Palette,      label:'Brand' },
+  ];
+  return (
+    <>
+      {mobileOpen&&<div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={()=>setMobileOpen(false)}/>}
+      <aside className={`fixed top-0 left-0 h-full z-50 flex flex-col w-60 transition-transform duration-300 ease-in-out ${mobileOpen?'translate-x-0':'-translate-x-full'} lg:translate-x-0 lg:relative lg:flex-shrink-0`} style={{background:'#0f172a'}}>
+        <div className="p-4 border-b border-slate-800">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-white text-lg shrink-0" style={{background:theme.primary}}>D</div>
+            <div className="min-w-0">
+              <p className="font-black text-sm text-white leading-tight truncate">{shopInfo?.shopName||'Duka Yangu'}</p>
+              <p className="text-slate-400 text-[9px] font-bold truncate">{shopInfo?.ownerName||'Owner'}</p>
+            </div>
+          </div>
+        </div>
+        <div className="px-3 py-2 border-b border-slate-800 flex items-center justify-between">
+          <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[8px] font-black ${isOnline?'bg-emerald-500/20 text-emerald-400':'bg-slate-700 text-slate-400'}`}>
+            {isOnline?<><Wifi size={8}/>{t('live')}</>:<><WifiOff size={8}/>{t('offline')}</>}
+          </div>
+          <button onClick={()=>{const nl=lang==='en'?'sw':'en';setLang(nl);if(shopInfo){const u={...shopInfo,lang:nl};setShopInfo(u);save('shopInfo',u);}}}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-800 text-slate-400 text-[8px] font-black hover:bg-slate-700 transition-colors">
+            <Globe size={8}/>{lang.toUpperCase()}
+          </button>
+        </div>
+        <div className="px-3 py-2 border-b border-slate-800">
+          <p className="text-[8px] text-slate-500 font-black uppercase">{t('stockValue')}</p>
+          <p className="font-black text-sm" style={{color:theme.accent}}>KSh {stockValue.toLocaleString()}</p>
+        </div>
+        <nav className="flex-1 py-3 px-2 flex flex-col gap-0.5 overflow-y-auto">
+          {navItems.map(({id,icon:Icon,label,badge})=>(
+            <button key={id} onClick={()=>{setTab(id);setMobileOpen(false);}}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm transition-all text-left w-full group relative ${tab===id?'text-white shadow-md':'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
+              style={tab===id?{background:theme.primary}:{}}>
+              <Icon size={16} className={tab===id?'text-white':'text-slate-500 group-hover:text-white'}/>
+              <span>{label}</span>
+              {badge>0&&<span className="ml-auto w-5 h-5 bg-red-500 text-white text-[8px] font-black rounded-full flex items-center justify-center">{badge}</span>}
+            </button>
+          ))}
+        </nav>
+        <div className="p-3 border-t border-slate-800">
+          <p className="text-[8px] text-slate-600 font-bold text-center">Duka Yangu v2.1</p>
+        </div>
+      </aside>
+    </>
+  );
+};
+
+// ─────────────────────────────────────────
+//  COUNTER — ORDER ENTRY FLOW
+// ─────────────────────────────────────────
+const CounterTab = ({ inventory, txs, cart, setCart, initiateSale, modal, t, theme }) => {
+  const [search, setSearch] = useState('');
+  const [orderMode, setOrderMode] = useState(false); // manual text entry mode
+  const [manualItemName, setManualItemName] = useState('');
+  const [manualItemQty, setManualItemQty]   = useState(1);
+  const [manualItemPrice, setManualItemPrice]= useState('');
+  const [suggestions, setSuggestions]       = useState([]);
+
+  const cashCount  = txs.filter(tx=>tx.type==='CASH').length;
+  const mpesaCount = txs.filter(tx=>tx.type==='MPESA').length;
+  const deniCount  = txs.filter(tx=>tx.type==='DENI').length;
+  const total      = cashCount+mpesaCount+deniCount;
+
+  const addToCart = (p) => {
+    const ex = cart.find(i=>i.id===p.id);
+    setCart(ex?cart.map(i=>i.id===p.id?{...i,qty:i.qty+1}:i):[...cart,{...p,qty:1,price:p.sellPrice,manual:false}]);
+  };
+
+  const removeFromCart  = id => setCart(cart.filter(i=>i.id!==id));
+  const updateQty       = (id,qty) => { if(qty<1) return removeFromCart(id); setCart(cart.map(i=>i.id===id?{...i,qty}:i)); };
+  const cartTotal       = Math.round(cart.reduce((a,i)=>a+i.price*i.qty,0));
+  const cartProfit      = Math.round(cart.reduce((a,i)=>a+((i.buyPrice||0)*i.qty?((i.price-(i.buyPrice||0))*i.qty):0),0));
+
+  const handleManualSearch = (val) => {
+    setManualItemName(val);
+    if(val.length>1) setSuggestions(inventory.filter(i=>i.name.toLowerCase().includes(val.toLowerCase())).slice(0,5));
+    else setSuggestions([]);
+  };
+  const addManualItem = (item=null) => {
+    if(item) {
+      addToCart(item); setManualItemName(''); setManualItemQty(1); setManualItemPrice(''); setSuggestions([]);
+    } else if(manualItemName.trim()) {
+      const found = inventory.find(i=>i.name.toLowerCase()===manualItemName.toLowerCase());
+      if(found) { addToCart(found); }
+      else { setCart(c=>[...c,{id:`m_${Date.now()}`,name:manualItemName.trim(),qty:manualItemQty,price:Number(manualItemPrice)||0,buyPrice:0,manual:true}]); }
+      setManualItemName(''); setManualItemQty(1); setManualItemPrice(''); setSuggestions([]);
+    }
+  };
+
+  return (
+    <div className="h-full flex flex-col lg:flex-row overflow-hidden">
+      {/* LEFT — product grid + order entry */}
+      <div className="flex-1 overflow-y-auto p-4">
+        {/* Customer counters */}
+        <div className="grid grid-cols-3 gap-2.5 mb-4">
+          {[
+            {count:cashCount,  label:t('cashCustomers'),  bg:'#0f172a', text:'text-white'},
+            {count:mpesaCount, label:t('mpesaCustomers'), bg:'#16a34a', text:'text-white'},
+            {count:deniCount,  label:t('deniCustomers'),  bg:'#fef2f2', text:'text-red-700', border:'border border-red-100'},
+          ].map(({count,label,bg,text,border})=>(
+            <div key={label} className={`rounded-2xl p-3 flex items-center gap-2.5 ${border||''}`} style={{background:border?undefined:bg}}>
+              <p className={`text-2xl font-black ${text}`}>{count}</p>
+              <p className={`text-[8px] font-black uppercase ${text} opacity-70`}>{label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Mode toggle */}
+        <div className="flex gap-2 mb-3">
+          <button onClick={()=>setOrderMode(false)} className={`flex-1 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all ${!orderMode?'text-white shadow-md':'bg-white border border-slate-200 text-slate-500'}`} style={!orderMode?{background:theme.primary}:{}}><ShoppingCart size={12} className="inline mr-1"/>Browse Products</button>
+          <button onClick={()=>setOrderMode(true)}  className={`flex-1 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all ${orderMode?'text-white shadow-md':'bg-white border border-slate-200 text-slate-500'}`}  style={orderMode?{background:theme.primary}:{}}><Edit3 size={12} className="inline mr-1"/>Manual Entry</button>
+        </div>
+
+        {!orderMode ? (
+          <>
+            <div className="relative mb-3">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14}/>
+              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t('searchGoods')}
+                className="w-full bg-white border border-slate-200 rounded-xl py-2.5 pl-9 pr-4 text-sm focus:outline-none shadow-sm"/>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2.5">
+              {inventory.filter(i=>i.name.toLowerCase().includes(search.toLowerCase())).map(p=>{
+                const inCart = cart.find(c=>c.id===p.id);
+                return (
+                  <button key={p.id} onClick={()=>{ if(p.stock<=0)return; addToCart(p); }}
+                    className={`bg-white border-2 p-3 rounded-2xl text-left flex flex-col gap-2 active:scale-95 transition-all relative overflow-hidden ${p.stock<=0?'opacity-40 cursor-not-allowed':'hover:shadow-md'} ${inCart?'border-opacity-100':'border-slate-200'}`}
+                    style={inCart?{borderColor:theme.primary}:{}}>
+                    {p.stock<5&&<div className="absolute top-0 right-0 left-0 h-0.5 bg-red-400"/>}
+                    <div className="flex justify-between items-start">
+                      <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{background:theme.light}}><Package size={13} style={{color:theme.primary}}/></div>
+                      <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full border ${p.stock<5?'border-red-200 bg-red-50 text-red-600':p.stock<10?'border-amber-200 bg-amber-50 text-amber-600':'border-slate-200 text-slate-500 bg-slate-50'}`}>{p.unit}</span>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-xs truncate text-slate-800">{p.name}</h3>
+                      <p className="font-black text-base leading-tight" style={{color:theme.primary}}>KSh {p.sellPrice}</p>
+                      <p className={`text-[9px] font-bold ${p.stock<10?'text-red-500':'text-slate-400'}`}>{p.stock<=0?'Out of stock':p.stock+' '+t('left')}</p>
+                    </div>
+                    {inCart&&<div className="absolute bottom-2 right-2 w-6 h-6 rounded-full text-white text-[9px] font-black flex items-center justify-center shadow" style={{background:theme.primary}}>{inCart.qty}</div>}
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        ) : (
+          /* Manual entry mode */
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
+            <p className="text-[9px] font-black uppercase text-slate-500 tracking-wider">{t('itemEntry')}</p>
+            <div className="relative">
+              <input value={manualItemName} onChange={e=>handleManualSearch(e.target.value)}
+                placeholder={t('addItemToOrder')} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold outline-none focus:border-blue-500 placeholder:text-slate-400"/>
+              {suggestions.length>0&&(
+                <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-10 overflow-hidden">
+                  {suggestions.map(s=>(
+                    <button key={s.id} onClick={()=>addManualItem(s)} className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-50 text-left border-b border-slate-100 last:border-0">
+                      <span className="text-sm font-bold text-slate-800">{s.name}</span>
+                      <span className="text-xs font-black" style={{color:theme.primary}}>KSh {s.sellPrice}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <p className="text-[8px] text-slate-500 font-black uppercase mb-1">Qty</p>
+                <input type="number" min="1" value={manualItemQty} onChange={e=>setManualItemQty(Number(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm font-bold outline-none focus:border-blue-500"/>
+              </div>
+              <div>
+                <p className="text-[8px] text-slate-500 font-black uppercase mb-1">Price (KSh)</p>
+                <input type="number" value={manualItemPrice} onChange={e=>setManualItemPrice(e.target.value)} placeholder="0" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm font-bold outline-none focus:border-blue-500 placeholder:text-slate-400"/>
+              </div>
+            </div>
+            <button onClick={()=>addManualItem()} className="w-full py-3 rounded-xl text-white font-black text-xs uppercase flex items-center justify-center gap-2 shadow-md" style={{background:theme.primary}}>
+              <Plus size={14}/>{t('addMore')}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* RIGHT — cart / checkout */}
+      <div className="w-full lg:w-72 xl:w-80 bg-white border-t lg:border-t-0 lg:border-l border-slate-200 flex flex-col flex-shrink-0 lg:h-full">
+        <div className="p-3 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
+          <ShoppingBag size={14} className="text-slate-500"/>
+          <span className="font-black text-[10px] uppercase tracking-wider text-slate-700">{t('basket')}</span>
+          {cart.length>0&&<span className="w-5 h-5 rounded-full text-white text-[8px] font-black flex items-center justify-center" style={{background:theme.primary}}>{cart.reduce((a,i)=>a+i.qty,0)}</span>}
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-3 space-y-2">
+          {!cart.length&&<div className="flex flex-col items-center justify-center h-full text-slate-300 py-12"><ShoppingCart size={40} className="mb-3 opacity-30"/><p className="text-xs font-black uppercase tracking-widest opacity-50">{t('empty')}</p></div>}
+          {cart.map(item=>(
+            <div key={item.id} className="bg-slate-50 border border-slate-100 p-3 rounded-2xl">
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <p className="font-bold text-xs text-slate-800 flex-1 leading-tight">{item.name}</p>
+                <button onClick={()=>removeFromCart(item.id)} className="text-slate-300 hover:text-red-500 p-0.5 hover:bg-red-50 rounded transition-colors shrink-0"><X size={12}/></button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <button onClick={()=>updateQty(item.id,item.qty-1)} className="w-6 h-6 rounded-lg bg-slate-200 hover:bg-slate-300 flex items-center justify-center transition-colors"><Minus size={10}/></button>
+                  <span className="w-7 text-center font-black text-sm">{item.qty}</span>
+                  <button onClick={()=>updateQty(item.id,item.qty+1)} className="w-6 h-6 rounded-lg flex items-center justify-center text-white transition-colors" style={{background:theme.primary}}><Plus size={10}/></button>
+                </div>
+                <p className="font-black text-sm" style={{color:theme.primary}}>KSh {(item.price*item.qty).toLocaleString()}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="border-t border-slate-100 bg-white flex-shrink-0 p-4 space-y-3">
+          <div className="flex justify-between items-end">
+            <div>
+              <p className="text-[9px] text-slate-400 font-black uppercase tracking-wider">{t('total')}</p>
+              {cartProfit>0&&<p className="text-[9px] text-emerald-600 font-bold">{t('profit')}: KSh {cartProfit.toLocaleString()}</p>}
+            </div>
+            <p className="text-3xl font-black" style={{color:theme.primary}}>KSh {cartTotal.toLocaleString()}</p>
+          </div>
+          <button onClick={()=>modal('customerPick')} disabled={!cart.length}
+            className="w-full py-3 rounded-2xl border-2 border-slate-200 text-slate-700 font-black text-xs uppercase flex items-center justify-center gap-2 hover:border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed">
+            <Users size={14}/>{t('deni')}
+          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button onClick={()=>initiateSale('CASH')} disabled={!cart.length}
+              className="py-3.5 rounded-2xl bg-slate-900 text-white font-black text-xs uppercase flex items-center justify-center gap-1.5 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg">
+              <Wallet size={13}/>{t('cash')}
+            </button>
+            <button onClick={()=>initiateSale('MPESA')} disabled={!cart.length}
+              className="py-3.5 rounded-2xl bg-emerald-500 text-white font-black text-xs uppercase flex items-center justify-center gap-1.5 hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg">
+              <Smartphone size={13}/>{t('mpesaPush')}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────
+//  EXPENSE ANALYSIS
+// ─────────────────────────────────────────
+const ExpTagBadge = ({ type, t }) => {
+  const cfg = {
+    fixed:     { label:t('mustPay'),   cls:'bg-red-100 text-red-700 border-red-200',    icon:<Lock size={8}/> },
+    recurring: { label:t('recurring'), cls:'bg-amber-100 text-amber-700 border-amber-200', icon:<Repeat size={8}/> },
+    oneoff:    { label:t('oneOff'),    cls:'bg-slate-100 text-slate-600 border-slate-200', icon:<Tag size={8}/> },
+  };
+  const c = cfg[type]||cfg.oneoff;
+  return <span className={`inline-flex items-center gap-1 text-[7px] font-black px-1.5 py-0.5 rounded-full border ${c.cls}`}>{c.icon}{c.label}</span>;
+};
+
+const ExpenseAnalysis = ({ expenses, t, onDelete, theme }) => {
+  const [period, setPeriod] = useState('monthly');
+  const [activeType, setActiveType] = useState('all');
+  const REF_DATE = new Date('2024-03-27');
+
+  const filtered = useMemo(()=>{
+    let list = expenses;
+    if(period==='weekly'){const cut=new Date(REF_DATE);cut.setDate(REF_DATE.getDate()-7);list=list.filter(e=>new Date(e.date)>=cut);}
+    else if(period==='monthly'){const cut=new Date(REF_DATE);cut.setDate(REF_DATE.getDate()-30);list=list.filter(e=>new Date(e.date)>=cut);}
+    if(activeType!=='all') list=list.filter(e=>e.type===activeType);
+    return list;
+  },[expenses,period,activeType]);
+
+  const allPeriod = useMemo(()=>{
+    let list = expenses;
+    if(period==='weekly'){const cut=new Date(REF_DATE);cut.setDate(REF_DATE.getDate()-7);list=list.filter(e=>new Date(e.date)>=cut);}
+    else if(period==='monthly'){const cut=new Date(REF_DATE);cut.setDate(REF_DATE.getDate()-30);list=list.filter(e=>new Date(e.date)>=cut);}
+    return list;
+  },[expenses,period]);
+
+  const totals = {
+    all:       allPeriod.reduce((a,e)=>a+e.amount,0),
+    fixed:     allPeriod.filter(e=>e.type==='fixed').reduce((a,e)=>a+e.amount,0),
+    recurring: allPeriod.filter(e=>e.type==='recurring').reduce((a,e)=>a+e.amount,0),
+    oneoff:    allPeriod.filter(e=>e.type==='oneoff').reduce((a,e)=>a+e.amount,0),
+  };
+
+  const sections = [
+    {key:'all',label:'All',total:totals.all,count:allPeriod.length,cls:'border-slate-300'},
+    {key:'fixed',label:t('mustPay'),total:totals.fixed,count:allPeriod.filter(e=>e.type==='fixed').length,cls:'border-red-400'},
+    {key:'recurring',label:t('recurring'),total:totals.recurring,count:allPeriod.filter(e=>e.type==='recurring').length,cls:'border-amber-400'},
+    {key:'oneoff',label:t('oneOff'),total:totals.oneoff,count:allPeriod.filter(e=>e.type==='oneoff').length,cls:'border-slate-300'},
+  ];
+  const typeLeft = {fixed:'border-l-red-400 bg-red-50/20',recurring:'border-l-amber-400 bg-amber-50/20',oneoff:'border-l-slate-300 bg-white'};
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider">{t('expPeriod')}:</span>
+        {[['weekly',t('weekly')],['monthly',t('monthly')],['all',t('allTime')]].map(([k,l])=>(
+          <button key={k} onClick={()=>setPeriod(k)}
+            className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all ${period===k?'text-white shadow-md':'bg-white border border-slate-200 text-slate-500 hover:border-slate-300'}`}
+            style={period===k?{background:theme.primary}:{}}>
+            {l}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        {sections.map(s=>(
+          <button key={s.key} onClick={()=>setActiveType(s.key)}
+            className={`p-3 rounded-2xl border-2 text-left transition-all ${activeType===s.key?'border-slate-800 shadow-md bg-white':'border-slate-200 bg-white hover:border-slate-300'}`}>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-[8px] font-black uppercase text-slate-400">{s.label}</p>
+              {s.key!=='all'&&<ExpTagBadge type={s.key} t={t}/>}
+            </div>
+            <p className="text-base font-black text-slate-800">KSh {s.total.toLocaleString()}</p>
+            <p className="text-[8px] text-slate-400 font-bold">{s.count} items</p>
+          </button>
+        ))}
+      </div>
+
+      <div className="flex flex-wrap gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-200 text-[9px]">
+        <div className="flex items-center gap-2"><span className="px-2 py-0.5 bg-red-50 text-red-600 border border-red-200 rounded-full font-black">🔴 {t('mustPay')}</span><span className="text-slate-500">Rent, Staff, Electricity — non-negotiable monthly costs</span></div>
+        <div className="flex items-center gap-2"><span className="px-2 py-0.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-full font-black">🟡 {t('recurring')}</span><span className="text-slate-500">Transport, Packaging — repeats but varies</span></div>
+        <div className="flex items-center gap-2"><span className="px-2 py-0.5 bg-slate-100 text-slate-600 border border-slate-200 rounded-full font-black">⚪ {t('oneOff')}</span><span className="text-slate-500">Repairs, Emergency — unexpected costs</span></div>
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+        <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
+          <Receipt size={12} className="text-slate-500"/>
+          <h3 className="text-[9px] font-black uppercase tracking-widest text-slate-500">{t('allExpenses')} ({filtered.length})</h3>
+        </div>
+        <div className="divide-y divide-slate-100">
+          {filtered.length===0&&<div className="p-10 text-center text-slate-400"><Receipt size={24} className="mx-auto mb-2 opacity-30"/><p className="text-xs font-bold">No expenses in this period</p></div>}
+          {filtered.map(exp=>(
+            <div key={exp.id} className={`flex items-center gap-3 p-4 hover:bg-slate-50 transition-colors border-l-4 ${typeLeft[exp.type]||'bg-white'}`}>
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${exp.type==='fixed'?'bg-red-50':exp.type==='recurring'?'bg-amber-50':'bg-slate-100'}`}>
+                {exp.type==='fixed'?<Lock size={13} className="text-red-500"/>:exp.type==='recurring'?<Repeat size={13} className="text-amber-500"/>:<Tag size={13} className="text-slate-400"/>}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap"><p className="font-black text-sm text-slate-800">{exp.category}</p><ExpTagBadge type={exp.type} t={t}/></div>
+                <p className="text-[9px] text-slate-500 font-bold truncate">{exp.note} · {exp.date}</p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <p className="font-black text-slate-800 whitespace-nowrap">KSh {exp.amount.toLocaleString()}</p>
+                <button onClick={()=>onDelete(exp.id)} className="text-slate-300 hover:text-red-500 p-1.5 rounded hover:bg-red-50 transition-colors"><Trash2 size={12}/></button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────
+//  REPORTS — TODAY with date history
+// ─────────────────────────────────────────
+const TodayReport = ({ txs, t, theme }) => {
+  const [viewDate, setViewDate] = useState(null);
+  const allDates = useMemo(()=>[...new Set(txs.map(tx=>tx.date))].sort((a,b)=>b.localeCompare(a)),[txs]);
+  const activeDate = viewDate || (allDates[0]||todayStr());
+  const dayTxs = txs.filter(tx=>tx.date===activeDate);
+  const dayTotal = dayTxs.reduce((a,b)=>a+b.amount,0);
+  const dayCash  = dayTxs.filter(t=>t.type==='CASH').reduce((a,b)=>a+b.amount,0);
+  const dayMpesa = dayTxs.filter(t=>t.type==='MPESA').reduce((a,b)=>a+b.amount,0);
+  const dayDeni  = dayTxs.filter(t=>t.type==='DENI').reduce((a,b)=>a+b.amount,0);
+  const dateIdx  = allDates.indexOf(activeDate);
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Date nav */}
+      <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-2xl p-2 shadow-sm">
+        <button onClick={()=>{ const i=allDates.indexOf(activeDate); if(i<allDates.length-1) setViewDate(allDates[i+1]); }} disabled={dateIdx>=allDates.length-1} className="p-2 rounded-xl hover:bg-slate-100 disabled:opacity-30 transition-colors"><ArrowLeft size={15}/></button>
+        <div className="flex-1 text-center">
+          <p className="font-black text-sm text-slate-800">{activeDate===todayStr()?'Today':fmtDate(activeDate)}</p>
+          <p className="text-[9px] text-slate-400 font-bold">{dayTxs.length} transactions</p>
+        </div>
+        <button onClick={()=>{ const i=allDates.indexOf(activeDate); if(i>0) setViewDate(allDates[i-1]); }} disabled={dateIdx<=0} className="p-2 rounded-xl hover:bg-slate-100 disabled:opacity-30 transition-colors"><ArrowRight size={15}/></button>
+      </div>
+      {/* Date pills */}
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {allDates.map(d=>(
+          <button key={d} onClick={()=>setViewDate(d)} className={`px-3 py-1.5 rounded-xl text-[9px] font-black whitespace-nowrap border transition-all shrink-0 ${activeDate===d?'text-white border-transparent':'bg-white border-slate-200 text-slate-500'}`} style={activeDate===d?{background:theme.primary}:{}}>{d===todayStr()?'Today':fmtDate(d)}</button>
+        ))}
+      </div>
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[{label:t('salesLogged'),val:`KSh ${dayTotal.toLocaleString()}`},{label:t('physicalCash'),val:`KSh ${dayCash.toLocaleString()}`},{label:'M-Pesa',val:`KSh ${dayMpesa.toLocaleString()}`},{label:t('newDeni'),val:`KSh ${dayDeni.toLocaleString()}`,isDeni:true}].map(s=>(
+          <div key={s.label} className="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
+            <p className="text-[8px] font-black uppercase tracking-widest text-slate-400">{s.label}</p>
+            <p className="text-lg font-black text-slate-800 mt-1">{s.val}</p>
+            <span className={`text-[8px] font-black px-2 py-0.5 rounded-md ${s.isDeni?'bg-red-50 text-red-600':'bg-emerald-50 text-emerald-600'}`}>{s.isDeni?'↑ credit given':'↑ recorded'}</span>
+          </div>
+        ))}
+      </div>
+      {/* Transactions */}
+      <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+        <div className="p-4 border-b border-slate-100 bg-slate-50/50"><h3 className="font-black text-[9px] uppercase tracking-widest text-slate-500 flex items-center gap-2"><History size={11}/>{t('transactions')} — {activeDate===todayStr()?'Today':fmtDate(activeDate)}</h3></div>
+        {dayTxs.length===0&&<div className="p-10 text-center text-slate-400"><Receipt size={24} className="mx-auto mb-2 opacity-30"/><p className="text-xs font-bold">No transactions on this date</p></div>}
+        <div className="divide-y divide-slate-100">
+          {dayTxs.map(tx=>(
+            <div key={tx.id} className="flex justify-between items-center p-4 hover:bg-slate-50">
+              <div className="flex gap-3 items-center">
+                <div className={`p-2 rounded-xl ${tx.type==='CASH'?'bg-emerald-100 text-emerald-600':tx.type==='MPESA'?'bg-blue-100 text-blue-600':'bg-red-100 text-red-600'}`}>
+                  {tx.type==='CASH'?<Wallet size={13}/>:tx.type==='MPESA'?<Smartphone size={13}/>:<Users size={13}/>}
+                </div>
+                <div><p className="text-xs font-black uppercase text-slate-800">{tx.type} Sale</p><p className="text-[8px] text-slate-500 font-bold">{tx.time} · {tx.items} item(s)</p></div>
+              </div>
+              <p className="font-black text-sm text-slate-800">KSh {tx.amount.toLocaleString()}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────
+//  PERFORMANCE — week/month/year with explanation
+// ─────────────────────────────────────────
+const PerformanceReport = ({ inventory, t, theme }) => {
+  const [perfFilter, setPerfFilter] = useState('month');
+  const sorted = useMemo(()=>[...inventory].sort((a,b)=>b.salesCount[perfFilter]-a.salesCount[perfFilter]),[inventory,perfFilter]);
+  const labelMap = { week:t('thisWeek'), month:t('thisMonth'), year:t('thisYear') };
+  const periodDesc = { week:'Sales counted over the last 7 days', month:'Sales counted over the last 30 days', year:'Sales counted over the last 365 days' };
+  return (
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="flex bg-white p-1.5 rounded-2xl border border-slate-200 gap-1 shadow-sm">
+          {['week','month','year'].map(f=>(
+            <button key={f} onClick={()=>setPerfFilter(f)}
+              className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${perfFilter===f?'text-white shadow-md':'text-slate-500 hover:bg-slate-100'}`}
+              style={perfFilter===f?{background:theme.primary}:{}}>
+              {labelMap[f]}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-1.5 text-[9px] text-slate-500 font-bold bg-blue-50 border border-blue-100 rounded-xl px-3 py-2">
+          <Info size={11} className="text-blue-500 shrink-0"/>{periodDesc[perfFilter]}
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="bg-white border border-slate-200 p-5 rounded-3xl space-y-4 shadow-sm">
+          <div className="flex justify-between items-center">
+            <h3 className="font-black text-[9px] uppercase tracking-widest text-emerald-600">{t('topMoving')}</h3>
+            <BarChart3 size={14} className="text-emerald-500"/>
+          </div>
+          <div className="space-y-2">
+            {sorted.slice(0,5).map((p,i)=>{
+              const maxSales = sorted[0]?.salesCount[perfFilter]||1;
+              return (
+                <div key={p.id} className="space-y-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-bold text-slate-800">#{i+1} {p.name}</span>
+                    <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">{p.salesCount[perfFilter]} sold</span>
+                  </div>
+                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full rounded-full bg-emerald-400 transition-all duration-500" style={{width:`${(p.salesCount[perfFilter]/maxSales)*100}%`}}/>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="bg-white border border-slate-200 p-5 rounded-3xl space-y-4 shadow-sm">
+          <div className="flex justify-between items-center">
+            <h3 className="font-black text-[9px] uppercase tracking-widest text-amber-600">{t('slowMoving')}</h3>
+            <TrendingDown size={14} className="text-amber-500"/>
+          </div>
+          <div className="space-y-2">
+            {sorted.slice(-5).reverse().map(p=>(
+              <div key={p.id} className="flex justify-between items-center p-3 bg-amber-50/50 rounded-2xl border border-amber-100">
+                <span className="text-sm font-bold text-slate-600">{p.name}</span>
+                <div className="text-right">
+                  <p className="text-[9px] font-black text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">{p.salesCount[perfFilter]} sold</p>
+                  <p className="text-[8px] text-slate-400 mt-0.5">in {labelMap[perfFilter].toLowerCase()}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────
+//  MAIN APP
+// ─────────────────────────────────────────
+export default function App() {
+  const { save, load } = useOffline();
+  const [isOnboarded, setIsOnboarded] = useState(false);
+  const [shopInfo,    setShopInfo]    = useState(null);
+  const [isPinLocked, setIsPinLocked] = useState(true);
+  const [lang,        setLang]        = useState('en');
+  const [themeKey,    setThemeKeyState]= useState('blue');
+  const theme = THEMES[themeKey];
+  const t = useCallback(k=>LANG[lang]?.[k]||k,[lang]);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  useEffect(()=>{
+    const on=()=>setIsOnline(true),off=()=>setIsOnline(false);
+    window.addEventListener('online',on);window.addEventListener('offline',off);
+    return()=>{window.removeEventListener('online',on);window.removeEventListener('offline',off);};
+  },[]);
+
+  const setThemeKey = (k) => { setThemeKeyState(k); save('themeKey',k); };
+
+  const [tab,          setTab]          = useState('sales');
+  const [stockTab,     setStockTab]     = useState('inventory');
+  const [reportTab,    setReportTab]    = useState('today');
+  const [month,        setMonth]        = useState('March');
+  const [search,       setSearch]       = useState('');
+  const [mobileNavOpen,setMobileNavOpen]= useState(false);
+  const [notification, setNotification] = useState(null);
+  const [modals,       setModals]       = useState({ addProduct:false, addCustomer:false, customerPick:false, addSupplier:false, addExpense:false, restock:false });
+  const [restockTarget,    setRestockTarget]    = useState(null);
+  const [pendingPayment,   setPendingPayment]   = useState(null);
+  const [showConfirm,      setShowConfirm]      = useState(false);
+  const [showMpesaPhone,   setShowMpesaPhone]   = useState(false);
+  const [recurringPhone,   setRecurringPhone]   = useState(null);
+  const [discount5,        setDiscount5]        = useState(false);
+  const [deleteConfirmSup, setDeleteConfirmSup] = useState(null);
+  const [newSupRating,     setNewSupRating]     = useState(4);
+  const [newSupItems,      setNewSupItems]      = useState([]);
+  const [newSupItemInput,  setNewSupItemInput]  = useState('');
+  const [clearDebtTarget,  setClearDebtTarget]  = useState(null); // {customer, debt}
+  const [dismissedNotifs,  setDismissedNotifs]  = useState([]);
+
+  const [inventory, setInventory] = useState(SEED_INVENTORY);
+  const [deni,      setDeni]      = useState(SEED_DENI);
+  const [suppliers, setSuppliers] = useState(SEED_SUPPLIERS);
+  const [restocks,  setRestocks]  = useState(SEED_RESTOCKS);
+  const [expenses,  setExpenses]  = useState(SEED_EXPENSES);
+  const [txs,       setTxs]       = useState(SEED_TX);
+  const [cart,      setCart]      = useState([]);
+  const [mpesaLog,  setMpesaLog]  = useState([]);
+
+  useEffect(()=>{
+    (async()=>{
+      const [inv,dn,sup,rst,exp,tx,shop,mlog,tk,dn2] = await Promise.all([
+        load('inventory'),load('deni'),load('suppliers'),load('restocks'),
+        load('expenses'),load('txs'),load('shopInfo'),load('mpesaLog'),load('themeKey'),load('dismissedNotifs')
+      ]);
+      if(inv)setInventory(inv);if(dn)setDeni(dn);if(sup)setSuppliers(sup);
+      if(rst)setRestocks(rst);if(exp)setExpenses(exp);if(tx)setTxs(tx);
+      if(mlog)setMpesaLog(mlog);if(tk)setThemeKeyState(tk);if(dn2)setDismissedNotifs(dn2);
+      if(shop){setShopInfo(shop);setLang(shop.lang||'en');setIsOnboarded(true);}
+    })();
+  },[]);
+
+  useEffect(()=>{save('inventory',inventory);},[inventory]);
+  useEffect(()=>{save('deni',deni);},[deni]);
+  useEffect(()=>{save('suppliers',suppliers);},[suppliers]);
+  useEffect(()=>{save('restocks',restocks);},[restocks]);
+  useEffect(()=>{save('expenses',expenses);},[expenses]);
+  useEffect(()=>{save('txs',txs);},[txs]);
+  useEffect(()=>{save('mpesaLog',mpesaLog);},[mpesaLog]);
+  useEffect(()=>{save('dismissedNotifs',dismissedNotifs);},[dismissedNotifs]);
+
+  const notifications = useMemo(()=>buildNotifications(inventory,deni,txs,expenses).filter(n=>!dismissedNotifs.includes(n.id)),[inventory,deni,txs,expenses,dismissedNotifs]);
+  const dismissNotif  = id => setDismissedNotifs(prev=>[...prev,id]);
+
+  const effectiveCartSale = useMemo(()=>cart.reduce((a,i)=>a+i.price*i.qty,0)*(discount5?0.95:1),[cart,discount5]);
+  const cartProfit        = useMemo(()=>cart.reduce((a,i)=>a+((i.price-(i.buyPrice||0))*i.qty),0)*(discount5?0.95:1),[cart,discount5]);
+  const stockValue        = useMemo(()=>inventory.reduce((a,i)=>a+i.buyPrice*i.stock,0),[inventory]);
+  const totalDeni         = useMemo(()=>deni.reduce((a,c)=>a+balance(c.debts),0),[deni]);
+  const totalExpenses     = useMemo(()=>expenses.reduce((a,e)=>a+e.amount,0),[expenses]);
+  const lowStockItems     = useMemo(()=>inventory.filter(i=>i.stock<10),[inventory]);
+
+  const loanScore = useMemo(()=>{
+    const mths=Object.values(HISTORY);const profits=mths.map(m=>m.profit);
+    const pg=(profits[2]-profits[0])/profits[0];
+    const s1=Math.min(30,Math.round(pg*100));
+    const s2=Math.max(0,Math.round((1-totalDeni/mths[2].sales)*25));
+    const s3=Math.max(0,Math.round((1-totalExpenses/mths[2].sales)*20));
+    const s4=Math.min(15,Math.round(((mths[2].sales-mths[0].sales)/mths[0].sales)*50));
+    const s5=Math.max(0,10-lowStockItems.length*2);
+    return {total:Math.min(100,s1+s2+s3+s4+s5),breakdown:[
+      {label:'Profit Consistency',score:s1,max:30},{label:'Debt Management',score:s2,max:25},
+      {label:'Expense Control',score:s3,max:20},{label:'Sales Growth',score:s4,max:15},{label:'Stock Health',score:s5,max:10},
+    ]};
+  },[totalDeni,totalExpenses,lowStockItems]);
+
+  const toast   = msg => { setNotification(msg); setTimeout(()=>setNotification(null),3000); };
+  const modal   = (key,val=true) => setModals(m=>({...m,[key]:val}));
+  const today   = () => todayStr();
+  const isRecur = phone => phone&&mpesaLog.filter(e=>e.phone===phone).length>=3;
+
+  const initiateSale = (method, customerId=null) => {
+    if(!cart.length)return;
+    setPendingPayment({method,customerId}); setDiscount5(false); setShowConfirm(true);
+  };
+  const handleConfirmSale = () => {
+    setShowConfirm(false);
+    if(pendingPayment.method==='MPESA') setShowMpesaPhone(true);
+    else finalizeSale(pendingPayment.method,pendingPayment.customerId,null);
+  };
+  const handleMpesaPhone = phone => {
+    setShowMpesaPhone(false);
+    if(phone&&isRecur(phone)) setRecurringPhone(phone);
+    else finalizeSale('MPESA',null,phone);
+  };
+  const handleRecurring = apply => { setDiscount5(apply); setRecurringPhone(null); finalizeSale('MPESA',null,recurringPhone,apply); };
+  const finalizeSale = (method,customerId,mpesaPhone,discountApplied=discount5) => {
+    const fa = Math.round(cart.reduce((a,i)=>a+i.price*i.qty,0)*(discountApplied?0.95:1));
+    const fp = Math.round(cart.reduce((a,i)=>a+(i.price-(i.buyPrice||0))*i.qty,0)*(discountApplied?0.95:1));
+    setTxs(prev=>[{id:Date.now(),type:method,amount:fa,profit:fp,time:timeNow(),date:today(),items:cart.length},...prev]);
+    setInventory(prev=>prev.map(item=>{
+      const ci=cart.find(c=>c.id===item.id);
+      return ci&&!ci.manual?{...item,stock:item.stock-ci.qty,salesCount:{week:item.salesCount.week+ci.qty,month:item.salesCount.month+ci.qty,year:item.salesCount.year+ci.qty}}:item;
+    }));
+    if(method==='DENI'&&customerId) {
+      setDeni(prev=>prev.map(c=>c.id===customerId?{...c,debts:[...c.debts,{id:Date.now(),amount:fa,date:today(),note:cart.map(i=>i.name).join(', ')}]}:c));
+      toast(`✓ Deni recorded`);
+    } else {
+      if(mpesaPhone) setMpesaLog(prev=>[...prev,{phone:mpesaPhone,date:today()}]);
+      toast(`✓ ${method} Sale${discountApplied?' (5% off!) 🌟':''}`);
+    }
+    setCart([]);modal('customerPick',false);setPendingPayment(null);setDiscount5(false);
+  };
+
+  const handleClearDebt = (method) => {
+    if(!clearDebtTarget)return;
+    const {customer,debt} = clearDebtTarget;
+    setDeni(prev=>prev.map(c=>c.id!==customer.id?c:{...c,debts:c.debts.filter(d=>d.id!==debt.id)}));
+    setTxs(prev=>[{id:Date.now(),type:method,amount:debt.amount,time:timeNow(),date:today(),items:1,note:`Debt cleared: ${customer.name}`},...prev]);
+    toast(`✓ KSh ${debt.amount.toLocaleString()} cleared (${method}) — ${customer.name}`);
+    setClearDebtTarget(null);
+  };
+
+  const smsCustomer   = c => { const bal=balance(c.debts); const msg=`Habari ${c.name.split(' ')[0]}, balance yako ni KSh ${bal.toLocaleString()}. Karibu kulipa. Asante! 🙏`; window.open(`sms:${c.phone}?body=${encodeURIComponent(msg)}`); };
+  const callSupplier  = s => { window.open(`tel:${s.phone}`); toast(`Calling ${s.name}...`); };
+  const deleteSupplier= id => { setSuppliers(prev=>prev.filter(s=>s.id!==id)); setDeleteConfirmSup(null); toast('Supplier removed.'); };
+  const markDelivered = id => setRestocks(prev=>prev.map(r=>r.id===id?{...r,status:'delivered'}:r));
+
+  const generateEODReport = () => {
+    const totSales=txs.reduce((a,b)=>a+b.amount,0);
+    const cash=txs.filter(t=>t.type==='CASH').reduce((a,b)=>a+b.amount,0);
+    const mpesa=txs.filter(t=>t.type==='MPESA').reduce((a,b)=>a+b.amount,0);
+    const deniT=txs.filter(t=>t.type==='DENI').reduce((a,b)=>a+b.amount,0);
+    const low=lowStockItems.map(i=>`• ${i.name}: ${i.stock} left`).join('\n');
+    const rpt=`🏪 *DUKA END-OF-DAY REPORT*\n📅 ${new Date().toLocaleDateString('en-KE',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}\n━━━━━━━━━━━━━━━\n💰 *SALES*\nTotal: KSh ${totSales.toLocaleString()}\n├ Cash:  KSh ${cash.toLocaleString()}\n├ MPesa: KSh ${mpesa.toLocaleString()}\n└ Deni:  KSh ${deniT.toLocaleString()}\n\n📦 *LOW STOCK*\n${low||'✅ All well stocked'}\n\n💸 *EXPENSES* KSh ${totalExpenses.toLocaleString()}\n📊 *DENI OUT* KSh ${totalDeni.toLocaleString()}\n🏦 *LOAN SCORE* ${loanScore.total}/100\n─────────────────────\nReport by Duka Yangu ✅`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(rpt)}`);
+    toast('EOD Report shared!');
+  };
+
+  const onAddProduct  = e => { e.preventDefault(); const f=new FormData(e.target); setInventory(prev=>[...prev,{id:Date.now(),name:f.get('name'),buyPrice:+f.get('buy'),sellPrice:+f.get('sell'),stock:+f.get('stock'),unit:f.get('unit'),salesCount:{week:0,month:0,year:0}}]); modal('addProduct',false); toast(`"${f.get('name')}" added`); };
+  const onAddCustomer = e => { e.preventDefault(); const f=new FormData(e.target); setDeni(prev=>[...prev,{id:Date.now(),name:f.get('name'),phone:f.get('phone'),debts:[]}]); modal('addCustomer',false); toast(`${f.get('name')} registered!`); };
+  const onAddSupplier = e => { e.preventDefault(); const f=new FormData(e.target); setSuppliers(prev=>[...prev,{id:Date.now(),name:f.get('name'),phone:f.get('phone'),contact:f.get('contact'),items:newSupItems,lastOrder:today(),rating:newSupRating}]); modal('addSupplier',false); setNewSupRating(4);setNewSupItems([]);setNewSupItemInput(''); toast('Supplier added!'); };
+
+  // ← FIXED: expense form now correctly adds to state
+  const onAddExpense = e => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const cat = f.get('category');
+    const newExp = {
+      id: Date.now(),
+      category: cat,
+      type: getExpType(cat),
+      amount: Number(f.get('amount')),
+      date: f.get('date') || today(),
+      note: f.get('note') || '',
+    };
+    setExpenses(prev => [newExp, ...prev]);
+    e.target.reset();
+    modal('addExpense', false);
+    toast(`Expense recorded: KSh ${newExp.amount.toLocaleString()}`);
+  };
+
+  const onCreateRestock = e => { e.preventDefault(); const f=new FormData(e.target); const qty=+f.get('qty'); setRestocks(prev=>[...prev,{id:Date.now(),supplierId:+f.get('supplier'),item:restockTarget?.name||f.get('itemName'),qty,totalCost:qty*(restockTarget?.buyPrice||0),status:'pending',date:today()}]); modal('restock',false); setRestockTarget(null); toast('Restock order placed!'); };
+  const handleOnboardingComplete = async info => { setShopInfo(info);setLang(info.lang);setIsOnboarded(true);setIsPinLocked(false);await save('shopInfo',info); };
+
+  if(!isOnboarded)return <OnboardingScreen onComplete={handleOnboardingComplete}/>;
+  if(isPinLocked&&shopInfo?.pin)return <PinLock shopName={shopInfo?.shopName} pin={shopInfo?.pin} lang={lang} onUnlock={()=>setIsPinLocked(false)} theme={theme}/>;
+
+  const tabLabels = { sales:t('counter'), stock:t('warehouse'), deni:t('creditBook'), expenses:t('expenses'), trends:t('reports'), notifications:t('notifications'), settings:'Brand' };
+
+  return (
+    <div className="flex h-screen bg-slate-100 text-slate-900 font-sans overflow-hidden">
+      {/* Toast */}
+      {notification&&(
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[300] bg-slate-900 text-white px-5 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2">
+          <CheckCircle2 size={14} style={{color:theme.accent}}/><span className="font-bold text-xs">{notification}</span>
+        </div>
+      )}
+
+      {/* Confirm sale */}
+      {showConfirm&&pendingPayment&&(
+        <SaleConfirmModal
+          amount={Math.round(effectiveCartSale)} profit={Math.round(cartProfit)}
+          orderItems={cart.map(i=>({name:i.name,qty:i.qty,price:i.price}))}
+          method={pendingPayment.method} discount5={discount5} t={t} theme={theme}
+          onConfirm={handleConfirmSale} onCancel={()=>{setShowConfirm(false);setPendingPayment(null);}}/>
+      )}
+      {showMpesaPhone&&<MpesaPhoneModal onSubmit={handleMpesaPhone} onSkip={()=>{setShowMpesaPhone(false);finalizeSale('MPESA',null,null);}} t={t}/>}
+      {recurringPhone&&<RecurringModal phone={recurringPhone} onApply={()=>handleRecurring(true)} onSkip={()=>handleRecurring(false)} t={t}/>}
+      {clearDebtTarget&&<ClearDebtModal debt={clearDebtTarget.debt} customer={clearDebtTarget.customer} onClear={handleClearDebt} onCancel={()=>setClearDebtTarget(null)} t={t} theme={theme}/>}
+
+      {/* Sidebar */}
+      <Sidebar tab={tab} setTab={setTab} t={t} shopInfo={shopInfo} lang={lang} setLang={setLang} save={save} setShopInfo={setShopInfo} isOnline={isOnline} stockValue={stockValue} mobileOpen={mobileNavOpen} setMobileOpen={setMobileNavOpen} theme={theme} notifCount={notifications.length}/>
+
+      {/* Main */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <header className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 flex-shrink-0">
+          <button onClick={()=>setMobileNavOpen(true)} className="lg:hidden p-2 rounded-xl hover:bg-slate-100 text-slate-500"><Menu size={18}/></button>
+          <h1 className="font-black text-sm text-slate-800 uppercase tracking-wide">{tabLabels[tab]}</h1>
+          {notifications.length>0&&tab!=='notifications'&&(
+            <button onClick={()=>setTab('notifications')} className="flex items-center gap-1.5 px-2.5 py-1 bg-red-50 border border-red-200 text-red-600 rounded-xl text-[9px] font-black ml-auto animate-pulse">
+              <Bell size={11}/>{notifications.length} alert{notifications.length>1?'s':''}
+            </button>
+          )}
+        </header>
+
+        <div className="flex-1 overflow-y-auto">
+
+          {/* ══ COUNTER ══ */}
+          {tab==='sales'&&(
+            <CounterTab inventory={inventory} txs={txs} cart={cart} setCart={setCart} initiateSale={initiateSale} modal={modal} t={t} theme={theme}/>
+          )}
+
+          {/* ══ STOCK ══ */}
+          {tab==='stock'&&(
+            <div className="flex flex-col h-full">
+              <div className="px-4 pt-4 pb-3 border-b border-slate-200 bg-white flex items-center gap-2 flex-wrap">
+                {['inventory','suppliers','restock'].map(st=>(
+                  <button key={st} onClick={()=>setStockTab(st)}
+                    className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all ${stockTab===st?'text-white shadow-md':'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                    style={stockTab===st?{background:theme.primary}:{}}>
+                    {st==='inventory'?t('inventory'):st==='suppliers'?t('suppliers'):t('restock')}
+                    {st==='restock'&&restocks.filter(r=>r.status==='pending').length>0?` (${restocks.filter(r=>r.status==='pending').length})`:''}
+                  </button>
+                ))}
+                <div className="ml-auto">
+                  {stockTab==='inventory'&&<button onClick={()=>modal('addProduct')} className="text-white px-3 py-1.5 rounded-xl text-[9px] font-black shadow-md flex items-center gap-1" style={{background:theme.primary}}><Plus size={12}/>{t('addItem')}</button>}
+                  {stockTab==='suppliers'&&<button onClick={()=>{setNewSupRating(4);setNewSupItems([]);modal('addSupplier');}} className="text-white px-3 py-1.5 rounded-xl text-[9px] font-black shadow-md flex items-center gap-1" style={{background:theme.primary}}><Plus size={12}/>{t('addSupplier')}</button>}
+                  {stockTab==='restock'&&<button onClick={()=>{setRestockTarget(null);modal('restock');}} className="text-white px-3 py-1.5 rounded-xl text-[9px] font-black shadow-md flex items-center gap-1" style={{background:theme.primary}}><Plus size={12}/>{t('addOrder')}</button>}
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 bg-slate-50">
+                {stockTab==='inventory'&&<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                  {inventory.map(item=>(
+                    <div key={item.id} className="bg-white border border-slate-200 p-4 rounded-2xl flex items-center gap-3 hover:shadow-sm transition-shadow">
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0" style={{background:theme.light,color:theme.primary}}>{item.name.charAt(0)}</div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-black text-sm text-slate-800 truncate">{item.name}</h3>
+                        <p className="text-[9px] text-emerald-600 font-bold">Margin: KSh {item.sellPrice-item.buyPrice}</p>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <div className="text-right hidden sm:block"><p className="text-[8px] font-black uppercase" style={{color:theme.primary}}>Price</p><p className="text-sm font-black text-slate-800">KSh {item.sellPrice}</p></div>
+                        <div className="text-right"><p className="text-[8px] text-slate-400 font-black uppercase">Stock</p><p className={`text-sm font-black ${item.stock<10?'text-red-600':'text-slate-800'}`}>{item.stock}</p></div>
+                        <button onClick={()=>{setRestockTarget(item);setStockTab('restock');modal('restock');}} className="p-2 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition-colors"><Truck size={14}/></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>}
+                {stockTab==='suppliers'&&<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {suppliers.map(s=>(
+                    <div key={s.id} className="bg-white border border-slate-200 p-5 rounded-3xl shadow-sm relative">
+                      {deleteConfirmSup===s.id&&(
+                        <div className="absolute inset-0 bg-white/95 rounded-3xl flex flex-col items-center justify-center p-6 z-10">
+                          <Trash2 size={28} className="text-red-500 mb-3"/>
+                          <p className="font-black text-sm text-slate-800 text-center mb-4">{t('confirmDeleteSupplier')}</p>
+                          <div className="flex gap-3 w-full">
+                            <button onClick={()=>setDeleteConfirmSup(null)} className="flex-1 py-2.5 border border-slate-200 rounded-xl text-[10px] font-black text-slate-600">{t('confirmDeleteNo')}</button>
+                            <button onClick={()=>deleteSupplier(s.id)} className="flex-1 py-2.5 bg-red-500 text-white rounded-xl text-[10px] font-black">{t('confirmDeleteYes')}</button>
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-11 h-11 rounded-2xl flex items-center justify-center font-black text-white" style={{background:theme.primary}}>{s.name.charAt(0)}</div>
+                          <div>
+                            <h3 className="font-black text-sm text-slate-800">{s.name}</h3>
+                            <p className="text-[9px] text-slate-500 font-bold">{s.phone} · {s.contact}</p>
+                            <div className="flex gap-0.5 mt-1">{[...Array(5)].map((_,i)=><Star key={i} size={9} className={i<s.rating?'text-amber-400 fill-amber-400':'text-slate-200 fill-slate-200'}/>)}</div>
+                          </div>
+                        </div>
+                        <button onClick={()=>setDeleteConfirmSup(s.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg"><Trash2 size={14}/></button>
+                      </div>
+                      <div className="mb-4">
+                        <p className="text-[8px] font-black uppercase text-slate-400 mb-1.5">{t('suppliesLabel')}</p>
+                        <div className="flex flex-wrap gap-1">{s.items.map(it=><span key={it} className="text-[9px] font-black bg-slate-100 text-slate-600 px-2 py-1 rounded-lg">{it}</span>)}{!s.items.length&&<span className="text-[9px] text-slate-400">{t('noItems')}</span>}</div>
+                      </div>
+                      <div className="flex justify-between items-center pt-3 border-t border-slate-100">
+                        <div><p className="text-[8px] text-slate-400 font-black uppercase">{t('lastOrder')}</p><p className="text-xs font-black text-slate-800">{s.lastOrder}</p></div>
+                        <button onClick={()=>callSupplier(s)} className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[10px] font-black transition-colors" style={{background:theme.light,color:theme.primary}}><Phone size={13}/>{t('callSupplier')}</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>}
+                {stockTab==='restock'&&<div className="space-y-4">
+                  {lowStockItems.length>0&&<div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl"><p className="text-[9px] font-black text-amber-700 uppercase mb-2">⚠ {t('lowStockAlert')}</p><div className="flex flex-wrap gap-2">{lowStockItems.map(i=><button key={i.id} onClick={()=>{setRestockTarget(i);modal('restock');}} className="text-[9px] font-black bg-white text-amber-700 border border-amber-200 px-3 py-1.5 rounded-lg hover:bg-amber-100">{i.name}: {i.stock} {t('left')}</button>)}</div></div>}
+                  {restocks.map(order=>{const sup=suppliers.find(s=>s.id===order.supplierId);return(
+                    <div key={order.id} className="bg-white border border-slate-200 p-4 rounded-2xl flex items-center justify-between gap-4 shadow-sm">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2.5 rounded-xl ${order.status==='delivered'?'bg-emerald-50 text-emerald-600':'bg-amber-50 text-amber-600'}`}><Truck size={16}/></div>
+                        <div><h4 className="font-black text-sm text-slate-800">{order.item}</h4><p className="text-[9px] text-slate-500 font-bold">{sup?.name||'—'} · {order.date}</p><p className="text-[9px] font-bold" style={{color:theme.primary}}>{order.qty} units · KSh {order.totalCost.toLocaleString()}</p></div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className={`text-[8px] font-black px-2.5 py-1 rounded-full ${order.status==='delivered'?'bg-emerald-100 text-emerald-700':'bg-amber-100 text-amber-700'}`}>{order.status.toUpperCase()}</span>
+                        {order.status==='pending'&&<button onClick={()=>markDelivered(order.id)} className="p-1.5 text-emerald-600 hover:bg-emerald-100 rounded-lg"><CheckCircle2 size={15}/></button>}
+                      </div>
+                    </div>
+                  );})}
+                </div>}
+              </div>
+            </div>
+          )}
+
+          {/* ══ CREDIT BOOK ══ */}
+          {tab==='deni'&&(
+            <div className="p-4 lg:p-6 flex flex-col gap-4">
+              <div className="flex justify-between items-start flex-wrap gap-3">
+                <div>
+                  <h2 className="text-xl font-black uppercase text-slate-800">{t('creditBook')}</h2>
+                  <p className="text-[10px] text-slate-500 font-bold mt-0.5">{t('outstanding')}: <span className="text-red-600">KSh {totalDeni.toLocaleString()}</span></p>
+                </div>
+                <button onClick={()=>modal('addCustomer')} className="text-white px-3 py-2 rounded-xl text-[9px] font-black shadow-md flex items-center gap-1.5" style={{background:theme.primary}}><Plus size={12}/>{t('addCustomer')}</button>
+              </div>
+              {/* Rating explanation */}
+              <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-2.5 text-[9px] text-blue-700 font-bold">
+                <Info size={12} className="text-blue-500 shrink-0"/>{t('ratingAuto')} — ⭐⭐⭐⭐⭐ = no overdue debts, ⭐ = 4+ overdue debts
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {deni.map(c=>{
+                  const over=c.debts.some(d=>isOverdue14(d.date));
+                  const od=c.debts.filter(d=>isOverdue14(d.date)).sort((a,b)=>new Date(a.date)-new Date(b.date))[0]?.date;
+                  const bal=balance(c.debts);
+                  const rating=custRating(c.debts);
+                  return(
+                    <div key={c.id} className={`p-5 rounded-3xl border flex flex-col shadow-sm ${over?'bg-red-50 border-red-200':'bg-white border-slate-200'}`}>
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center font-black text-base">{c.name.charAt(0)}</div>
+                          <div>
+                            <h3 className="font-black text-sm text-slate-800">{c.name}</h3>
+                            <p className="text-[9px] text-slate-500 font-bold">{c.phone}</p>
+                            <div className="flex items-center gap-0.5 mt-1" title={t('ratingAuto')}>
+                              {[...Array(5)].map((_,i)=><Star key={i} size={10} className={i<rating?'text-amber-400 fill-amber-400':'text-slate-200 fill-slate-200'}/>)}
+                              <span className="text-[7px] text-slate-400 ml-1 font-bold">auto-rated</span>
+                            </div>
+                          </div>
+                        </div>
+                        {over&&<div className="text-right"><span className="bg-red-100 text-red-700 text-[7px] font-black px-2 py-1 rounded-full uppercase animate-pulse">{t('overdue')}</span>{od&&<p className="text-[8px] text-red-500 mt-1 font-bold">{t('since')} {fmtDate(od)}</p>}</div>}
+                      </div>
+                      {/* Debts list with clear button */}
+                      <div className="flex-1 space-y-1.5 mb-4 max-h-36 overflow-y-auto">
+                        <p className="text-[8px] font-black uppercase text-slate-400 mb-1">{t('itemizedDebts')}</p>
+                        {c.debts.map(d=>(
+                          <div key={d.id} className={`flex justify-between items-center p-2.5 rounded-xl border ${isOverdue14(d.date)?'bg-red-50 border-red-100':'bg-slate-50 border-slate-100'}`}>
+                            <div>
+                              <p className="text-xs font-black text-slate-800">KSh {d.amount.toLocaleString()}</p>
+                              <p className="text-[8px] text-slate-400 font-bold">{fmtDate(d.date)}{d.note?` — ${d.note}`:''}</p>
+                              {isOverdue14(d.date)&&<p className="text-[7px] text-red-500 font-black">OVERDUE</p>}
+                            </div>
+                            <button
+                              onClick={()=>setClearDebtTarget({customer:c,debt:d})}
+                              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[8px] font-black text-white transition-all hover:opacity-90 shrink-0"
+                              style={{background:theme.primary}}>
+                              <CheckCircle2 size={11}/>Clear
+                            </button>
+                          </div>
+                        ))}
+                        {!c.debts.length&&<p className="text-[9px] text-slate-400 text-center py-3">{t('noActiveDebts')}</p>}
+                      </div>
+                      <div className="flex justify-between items-end pt-3 border-t border-slate-100">
+                        <div>
+                          <p className="text-[8px] text-slate-400 uppercase font-black">{t('balance')}</p>
+                          <p className={`text-xl font-black ${over?'text-red-600':''}`} style={over?{}:{color:theme.primary}}>KSh {bal.toLocaleString()}</p>
+                        </div>
+                        <button onClick={()=>smsCustomer(c)} className="bg-slate-800 text-white hover:bg-slate-700 p-2.5 rounded-xl flex items-center gap-1.5 transition-colors">
+                          <MessageSquare size={14}/><span className="text-[9px] font-black uppercase">{t('smsReminder')}</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* ══ EXPENSES ══ */}
+          {tab==='expenses'&&(
+            <div className="p-4 lg:p-6 flex flex-col gap-4">
+              <div className="flex justify-between items-start flex-wrap gap-3">
+                <div>
+                  <h2 className="text-xl font-black uppercase text-slate-800">{t('expTracker')}</h2>
+                  <p className="text-[10px] text-slate-500 font-bold mt-0.5">{t('monthTotal')}: <span className="text-red-600">KSh {totalExpenses.toLocaleString()}</span></p>
+                </div>
+                <button onClick={()=>modal('addExpense')} className="text-white px-3 py-2 rounded-xl text-[9px] font-black shadow-md flex items-center gap-1.5" style={{background:theme.primary}}><Plus size={12}/>{t('addExpense')}</button>
+              </div>
+              <ExpenseAnalysis expenses={expenses} t={t} onDelete={id=>setExpenses(prev=>prev.filter(e=>e.id!==id))} theme={theme}/>
+            </div>
+          )}
+
+          {/* ══ REPORTS ══ */}
+          {tab==='trends'&&(
+            <div className="p-4 lg:p-6 flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <div className="flex bg-white p-1 rounded-2xl border border-slate-200 gap-1 flex-wrap w-fit shadow-sm">
+                  {[['today',t('today')],['performance',t('performance')],['analysis',t('analysis')],['loan',t('loan')]].map(([id,label])=>(
+                    <button key={id} onClick={()=>setReportTab(id)}
+                      className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${reportTab===id?'text-white shadow-md':'text-slate-500 hover:bg-slate-50'}`}
+                      style={reportTab===id?{background:theme.primary}:{}}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <button onClick={generateEODReport} className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-[9px] font-black sm:ml-auto shadow-md transition-colors">
+                  <Send size={13}/>{t('eodReport')}
+                </button>
+              </div>
+
+              {reportTab==='today'&&<TodayReport txs={txs} t={t} theme={theme}/>}
+              {reportTab==='performance'&&<PerformanceReport inventory={inventory} t={t} theme={theme}/>}
+
+              {reportTab==='analysis'&&(
+                <div className="flex flex-col gap-4 pb-8">
+                  <div className="flex gap-2 overflow-x-auto pb-1">
+                    {Object.keys(HISTORY).map(m=>(
+                      <button key={m} onClick={()=>setMonth(m)}
+                        className={`px-5 py-2.5 rounded-2xl font-black text-[9px] uppercase tracking-widest whitespace-nowrap border transition-all shadow-sm ${month===m?'text-white border-transparent':'bg-white border-slate-200 text-slate-500'}`}
+                        style={month===m?{background:theme.primary}:{}}>
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="bg-white border border-slate-200 rounded-3xl p-5 md:p-8 shadow-sm">
+                    <h3 className="text-2xl font-black tracking-tighter mb-2 text-slate-800">{month}</h3>
+                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 mb-5"><p className="text-sm italic text-slate-600 leading-relaxed">"{HISTORY[month].desc}"</p></div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {[
+                        {label:t('totalSales'),  val:`KSh ${HISTORY[month].sales.toLocaleString()}`,  color:'text-slate-800'},
+                        {label:t('cashCollected'),val:`KSh ${HISTORY[month].cash.toLocaleString()}`,   color:'text-emerald-600'},
+                        {label:t('deniOut'),     val:`KSh ${HISTORY[month].deni.toLocaleString()}`,   color:'text-red-500'},
+                        {label:t('grossProfit'), val:`KSh ${HISTORY[month].profit.toLocaleString()}`, color:'text-blue-600'},
+                        {label:t('expensesLabel'),val:`KSh ${HISTORY[month].expenses.toLocaleString()}`,color:'text-amber-500'},
+                        {label:t('netAfterExp'), val:`KSh ${(HISTORY[month].profit-HISTORY[month].expenses).toLocaleString()}`,color:'text-emerald-500'},
+                      ].map(s=>(
+                        <div key={s.label} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                          <p className="text-[8px] font-black uppercase text-slate-400 mb-1">{s.label}</p>
+                          <p className={`text-xl font-black ${s.color}`}>{s.val}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-5 flex flex-wrap gap-3">
+                      <div className="flex-1 min-w-28 bg-emerald-50 border border-emerald-100 p-3 rounded-2xl"><p className="text-[8px] font-black text-emerald-600 uppercase mb-1">{t('topGoods')}</p><p className="text-sm font-black text-emerald-700">{HISTORY[month].top}</p></div>
+                      <div className="flex-1 min-w-28 bg-amber-50 border border-amber-100 p-3 rounded-2xl"><p className="text-[8px] font-black text-amber-600 uppercase mb-1">{t('slowGoods')}</p><p className="text-sm font-black text-amber-700">{HISTORY[month].slow}</p></div>
+                    </div>
+                    <button onClick={()=>toast('PDF generating…')} className="mt-5 flex items-center gap-2 bg-slate-800 text-white px-5 py-2.5 rounded-xl font-black text-[9px] uppercase hover:bg-slate-700 transition-colors shadow-md"><FileText size={14}/>{t('genPDF')}</button>
+                  </div>
+                </div>
+              )}
+
+              {reportTab==='loan'&&(
+                <div className="bg-white border border-slate-200 rounded-3xl p-5 md:p-8 shadow-sm">
+                  <div className="flex flex-col md:flex-row gap-8 items-center mb-8">
+                    <div className="flex-shrink-0 flex flex-col items-center">
+                      <div className={`w-36 h-36 rounded-full border-4 flex items-center justify-center flex-col ${loanScore.total>=70?'border-emerald-400 bg-emerald-50':loanScore.total>=50?'border-amber-400 bg-amber-50':'border-red-400 bg-red-50'}`}>
+                        <span className={`text-4xl font-black ${loanScore.total>=70?'text-emerald-600':loanScore.total>=50?'text-amber-500':'text-red-500'}`}>{loanScore.total}</span>
+                        <span className="text-[8px] font-black text-slate-400 uppercase">/100</span>
+                      </div>
+                      <p className="mt-3 font-black text-sm text-slate-800">{loanScore.total>=70?t('loanReady'):loanScore.total>=50?t('almostThere'):t('needsWork')}</p>
+                      <p className="text-[8px] text-slate-400 font-bold mt-1 text-center">{t('basedOn')}</p>
+                    </div>
+                    <div className="flex-1 space-y-3 w-full">
+                      <h3 className="font-black text-[10px] uppercase tracking-widest text-slate-400 mb-3">{t('scoreBreakdown')}</h3>
+                      {loanScore.breakdown.map(item=>(
+                        <div key={item.label} className="space-y-1">
+                          <div className="flex justify-between"><span className="text-[10px] font-black text-slate-700">{item.label}</span><span className="text-[10px] font-black" style={{color:theme.primary}}>{item.score}/{item.max}</span></div>
+                          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className={`h-full rounded-full transition-all duration-700 ${item.score/item.max>=0.7?'bg-emerald-400':item.score/item.max>=0.4?'bg-amber-400':'bg-red-400'}`} style={{width:`${(item.score/item.max)*100}%`}}/></div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 border-t border-slate-100 pt-5">
+                    {[{icon:<Shield size={18} className="text-blue-500"/>,title:'Reduce Deni',body:'Chase outstanding debts to lower your credit risk score.'},{icon:<Receipt size={18} className="text-amber-500"/>,title:'Track All Expenses',body:'Log every expense for 3 months. Lenders want predictable cost control.'},{icon:<TrendingUp size={18} className="text-emerald-500"/>,title:'Show Growth',body:'Month-over-month sales growth is the #1 signal lenders look for.'}].map(card=>(
+                      <div key={card.title} className="bg-slate-50 p-4 rounded-2xl border border-slate-100"><div className="mb-2">{card.icon}</div><h4 className="font-black text-xs text-slate-800 mb-1">{card.title}</h4><p className="text-[9px] text-slate-500 leading-relaxed">{card.body}</p></div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ══ NOTIFICATIONS ══ */}
+          {tab==='notifications'&&<NotificationsPanel notifications={notifications} onDismiss={dismissNotif} t={t} theme={theme}/>}
+
+          {/* ══ BRAND SETTINGS ══ */}
+          {tab==='settings'&&<BrandSettings theme={theme} setThemeKey={setThemeKey} themeKey={themeKey} t={t}/>}
+        </div>
+      </div>
+
+      {/* ── MODALS ── */}
+      {modals.addProduct&&(
+        <Modal title={t('stockEntry')} onClose={()=>modal('addProduct',false)}>
+          <form onSubmit={onAddProduct} className="space-y-3">
+            <MI name="name" placeholder={t('itemName')} required/>
+            <div className="grid grid-cols-2 gap-3"><MI name="buy" type="number" placeholder={t('buyPrice')} required/><MI name="sell" type="number" placeholder={t('sellPrice')} required/></div>
+            <div className="grid grid-cols-2 gap-3"><MI name="stock" type="number" placeholder={t('quantity')} required/><select name="unit" className="bg-slate-50 rounded-xl p-3 font-bold text-sm outline-none border border-slate-200 text-slate-700">{UNITS.map(u=><option key={u} value={u}>{u}</option>)}</select></div>
+            <button type="submit" className="w-full py-3.5 text-white rounded-xl font-black text-xs uppercase shadow-md mt-1" style={{background:theme.primary}}>{t('addToWarehouse')}</button>
+          </form>
+        </Modal>
+      )}
+      {modals.addCustomer&&(
+        <Modal title={t('newCustomer')} onClose={()=>modal('addCustomer',false)}>
+          <form onSubmit={onAddCustomer} className="space-y-3">
+            <MI name="name" placeholder={t('fullName')} required/>
+            <MI name="phone" placeholder={t('phone')} required/>
+            <button type="submit" className="w-full py-3.5 text-white rounded-xl font-black text-xs uppercase shadow-md mt-1" style={{background:theme.primary}}>{t('registerCustomer')}</button>
+          </form>
+        </Modal>
+      )}
+      {modals.customerPick&&(
+        <Modal title={t('choosePayer')} onClose={()=>modal('customerPick',false)}>
+          <div className="space-y-2 max-h-56 overflow-y-auto mb-4 pr-1">
+            {deni.map(c=>(
+              <button key={c.id} onClick={()=>{modal('customerPick',false);initiateSale('DENI',c.id);}}
+                className="w-full flex items-center justify-between p-3 bg-slate-50 rounded-xl hover:bg-blue-50 border border-transparent hover:border-blue-200 transition-all text-left group">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-white shadow-sm border border-slate-100 flex items-center justify-center text-xs font-bold text-slate-600">{c.name.charAt(0)}</div>
+                  <div><p className="font-bold text-xs text-slate-800">{c.name}</p><p className="text-[8px] text-slate-400 font-bold">Balance: KSh {balance(c.debts).toLocaleString()}</p></div>
+                </div>
+                <ChevronRight size={14} className="text-slate-400 group-hover:text-blue-500"/>
+              </button>
+            ))}
+          </div>
+          <button onClick={()=>{modal('customerPick',false);modal('addCustomer');}} className="w-full py-3 border-2 border-dashed border-slate-200 hover:border-slate-300 text-slate-500 text-[9px] font-black uppercase rounded-xl">{t('registerNew')}</button>
+        </Modal>
+      )}
+      {modals.addSupplier&&(
+        <Modal title={t('newSupplier')} onClose={()=>modal('addSupplier',false)}>
+          <form onSubmit={onAddSupplier} className="space-y-3">
+            <MI name="name" placeholder={t('companyName')} required/>
+            <MI name="contact" placeholder={t('contactPerson')} required/>
+            <MI name="phone" placeholder={t('phoneNumber')} required/>
+            <div>
+              <label className="text-[9px] font-black uppercase text-slate-500 tracking-wider block mb-1">{t('supplierRating')}</label>
+              <div className="flex gap-1">{[1,2,3,4,5].map(n=><button key={n} type="button" onClick={()=>setNewSupRating(n)} className="p-1 hover:scale-110 transition-transform"><Star size={22} className={n<=newSupRating?'text-amber-400 fill-amber-400':'text-slate-200 fill-slate-200'}/></button>)}</div>
+            </div>
+            <div>
+              <label className="text-[9px] font-black uppercase text-slate-500 tracking-wider block mb-1">{t('itemsSupplied')}</label>
+              <div className="flex flex-wrap gap-1 mb-2 min-h-6">{newSupItems.map(item=><span key={item} className="flex items-center gap-1 bg-blue-100 text-blue-700 text-[9px] font-bold px-2 py-1 rounded-lg">{item}<button type="button" onClick={()=>setNewSupItems(prev=>prev.filter(i=>i!==item))}><X size={10}/></button></span>)}</div>
+              <div className="flex gap-2">
+                <input className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold text-slate-900 outline-none focus:border-blue-500 placeholder:text-slate-400"
+                  placeholder={t('addItemTag')} value={newSupItemInput} onChange={e=>setNewSupItemInput(e.target.value)}
+                  onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();if(newSupItemInput.trim()){setNewSupItems(prev=>[...prev,newSupItemInput.trim()]);setNewSupItemInput('');}}}}/>
+                <button type="button" onClick={()=>{if(newSupItemInput.trim()){setNewSupItems(prev=>[...prev,newSupItemInput.trim()]);setNewSupItemInput('');}}} className="p-2.5 text-white rounded-xl hover:opacity-90 transition-opacity" style={{background:theme.primary}}><Plus size={14}/></button>
+              </div>
+            </div>
+            <button type="submit" className="w-full py-3.5 text-white rounded-xl font-black text-xs uppercase shadow-md mt-1" style={{background:theme.primary}}>{t('addSupplierBtn')}</button>
+          </form>
+        </Modal>
+      )}
+      {modals.addExpense&&(
+        <Modal title={t('recordExpense')} onClose={()=>modal('addExpense',false)}>
+          <form onSubmit={onAddExpense} className="space-y-3">
+            <div>
+              <label className="text-[9px] font-black uppercase text-slate-500 tracking-wider block mb-1">Category</label>
+              <select name="category" className="w-full bg-slate-50 rounded-xl p-3 font-bold text-sm outline-none border border-slate-200 text-slate-700" required>
+                <optgroup label="🔴 Must Pay (Fixed)">{FIXED_CATS.map(c=><option key={c} value={c}>{c}</option>)}</optgroup>
+                <optgroup label="🟡 Recurring">{['Transport','Packaging','Internet','Insurance'].map(c=><option key={c} value={c}>{c}</option>)}</optgroup>
+                <optgroup label="⚪ One-Off">{['Repairs','Other','Emergency'].map(c=><option key={c} value={c}>{c}</option>)}</optgroup>
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className="text-[9px] font-black uppercase text-slate-500 tracking-wider block mb-1">{t('amount')}</label><input name="amount" type="number" min="1" placeholder="e.g. 1200" required className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-bold text-sm outline-none focus:border-blue-500 placeholder:text-slate-400"/></div>
+              <div><label className="text-[9px] font-black uppercase text-slate-500 tracking-wider block mb-1">{t('date')}</label><input name="date" type="date" required className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-bold text-sm outline-none focus:border-blue-500"/></div>
+            </div>
+            <div><label className="text-[9px] font-black uppercase text-slate-500 tracking-wider block mb-1">{t('note')}</label><input name="note" placeholder="e.g. KPLC token" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-bold text-sm outline-none focus:border-blue-500 placeholder:text-slate-400"/></div>
+            <button type="submit" className="w-full py-3.5 text-white rounded-xl font-black text-xs uppercase shadow-md mt-1" style={{background:theme.primary}}>{t('recordExpBtn')}</button>
+          </form>
+        </Modal>
+      )}
+      {modals.restock&&(
+        <Modal title={t('restockOrder')} onClose={()=>{modal('restock',false);setRestockTarget(null);}}>
+          <form onSubmit={onCreateRestock} className="space-y-3">
+            {restockTarget?<div className="bg-slate-50 border border-slate-100 rounded-xl p-3"><p className="text-[9px] text-slate-400 uppercase font-black">Item</p><p className="font-black text-sm text-slate-800">{restockTarget.name}</p><p className="text-[9px] font-bold" style={{color:theme.primary}}>Buy price: KSh {restockTarget.buyPrice}</p></div>:<select name="itemName" className="w-full bg-slate-50 rounded-xl p-3 font-bold text-sm outline-none border border-slate-200 text-slate-700">{inventory.map(i=><option key={i.id} value={i.name}>{i.name}</option>)}</select>}
+            <select name="supplier" className="w-full bg-slate-50 rounded-xl p-3 font-bold text-sm outline-none border border-slate-200 text-slate-700">{suppliers.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select>
+            <MI name="qty" type="number" placeholder={t('qtyToOrder')} required/>
+            <button type="submit" className="w-full py-3.5 text-white rounded-xl font-black text-xs uppercase shadow-md mt-1" style={{background:theme.primary}}>{t('placeOrder')}</button>
+          </form>
+        </Modal>
+      )}
+    </div>
+  );
+}
