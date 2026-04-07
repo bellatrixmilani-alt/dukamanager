@@ -206,9 +206,7 @@
         const balance   = (debts)=> debts.reduce((a,d)=>a+d.amount,0);
         const custRating= (debts)=> Math.max(1,5-debts.filter(d=>isOverdue14(d.date)).length);
 
-        // [PASTE ENTIRE DUKA YANGU LOGIC HERE]
-        // (Due to the character limit of chats, I've simplified below, 
-        // but this script contains the functional structure you need)
+      
 
         function App() {
             // This is where your large 'export default function App()' logic lives
